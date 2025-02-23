@@ -1,0 +1,22 @@
+<Window xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+    x:Class="ResiCalc.MainWindow"
+    Icon="/Assets/App.ico"
+    MinWidth="600" MinHeight="240"
+    Width="800" Height="480"
+    Title="Resistance">
+
+    <Grid ColumnDefinitions="*, 4, 160, *" Name="grdMain">
+        <ListBox Grid.Column="0" Name="lsbCalculators" SelectionChanged="lsbCalculators_SelectionChanged"></ListBox>
+        <GridSplitter Grid.Column="1" ResizeDirection="Columns" />
+        <Border Grid.Column="2" Padding="4">
+            <StackPanel Name="pnlMeasurements" />
+        </Border>
+        <Border Grid.Column="3" Padding="4">
+        </Border>
+    </Grid>
+
+</Window>

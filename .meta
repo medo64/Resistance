@@ -1,0 +1,2 @@
+PROJECT_NAME=resistance
+ENTRY_PROJECT=src/Resistance.Gui/Resistance.Gui.csproj
