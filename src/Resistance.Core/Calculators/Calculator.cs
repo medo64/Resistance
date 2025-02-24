@@ -78,7 +78,7 @@ public abstract class Calculator {
         if (value.IsNull) {
             Config.Write(calculatorName + "." + measurementName, "");
         } else {
-            Config.Write(calculatorName + "." + measurementName, value.ToString(CultureInfo.InvariantCulture));
+            Config.Write(calculatorName + "." + measurementName, value.ToString());
         }
     }
 
@@ -142,42 +142,7 @@ public abstract class Calculator {
 
         var value = (Measurement)measurementProperty.GetValue(calculator)!;
         var unit = GetGuiUnit(calculator, measurementName);
-
-        if (value.IsNull) {
-            return "";
-        } else {
-            var number = (decimal)value;
-            return number switch {
-                >= 1_000_000_000_000_000_000_000_000_000m => GetString(number / 1_000_000_000_000_000_000_000_000_000m, 'R', unit),
-                >= 1_000_000_000_000_000_000_000_000m => GetString(number / 1_000_000_000_000_000_000_000_000m, 'Y', unit),
-                >= 1_000_000_000_000_000_000_000m => GetString(number / 1_000_000_000_000_000_000_000m, 'Z', unit),
-                >= 1_000_000_000_000_000_000m => GetString(number / 1_000_000_000_000_000_000m, 'E', unit),
-                >= 1_000_000_000_000_000m => GetString(number / 1_000_000_000_000_000m, 'P', unit),
-                >= 1_000_000_000_000m => GetString(number / 1_000_000_000_000m, 'T', unit),
-                >= 1_000_000_000m => GetString(number / 1_000_000_000m, 'G', unit),
-                >= 1_000_000m => GetString(number / 1_000_000m, 'M', unit),
-                >= 1000m => GetString(number / 1_000m, 'k', unit),
-                >= 1m => GetString(number, ' ', unit),
-                >= 0.001m => GetString(number * 1_000m, 'm', unit),
-                >= 0.000_001m => GetString(number * 1_000_000m, 'μ', unit),
-                >= 0.000_000_001m => GetString(number * 1_000_000_000m, 'n', unit),
-                >= 0.000_000_000_001m => GetString(number * 1_000_000_000_000m, 'p', unit),
-                >= 0.000_000_000_000_001m => GetString(number * 1_000_000_000_000_000m, 'f', unit),
-                >= 0.000_000_000_000_000_001m => GetString(number * 1_000_000_000_000_000_000m, 'a', unit),
-                >= 0.000_000_000_000_000_000_001m => GetString(number * 1_000_000_000_000_000_000_000m, 'z', unit),
-                >= 0.000_000_000_000_000_000_000_001m => GetString(number * 1_000_000_000_000_000_000_000_000m, 'y', unit),
-                _ => GetString(number * 1_000_000_000_000_000_000_000_000_000m, 'r', unit),
-            }
-        ;
-        }
-    }
-
-    private static string GetString(Measurement value, char si, string unit) {
-        if (string.IsNullOrEmpty(unit)) {
-            return value.ToString(CultureInfo.CurrentCulture) + si;
-        } else {
-            return value.ToString(CultureInfo.CurrentCulture) + " " + (si + unit).Trim();
-        }
+        return value.ToString(CultureInfo.CurrentCulture, unit);
     }
 
     public static void SetGuiValue(Calculator calculator, string measurementName, string text) {
@@ -240,7 +205,9 @@ public abstract class Calculator {
             var newValue = new Measurement(value * multiplier);
             var oldValue = (Measurement)measurementProperty.GetValue(calculator)!;
             if (newValue != oldValue) {
-                measurementProperty.SetValue(calculator, newValue);
+                try {
+                    measurementProperty.SetValue(calculator, newValue);
+                } catch (Exception) { }  // TODO: readonly
             }
         }
     }

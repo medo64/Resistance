@@ -24,12 +24,12 @@ public class ESeries : Calculator {
         get { return _Value; }
         set {
             _Value = value;
-            _E6 = new Measurement(Value, NumberSeries.E6, NumberSeriesRounding.Nearest, 2);
-            _E12 = new Measurement(Value, NumberSeries.E12, NumberSeriesRounding.Nearest, 2);
-            _E24 = new Measurement(Value, NumberSeries.E24, NumberSeriesRounding.Nearest, 2);
-            _E48 = new Measurement(Value, NumberSeries.E48, NumberSeriesRounding.Nearest, 3);
-            _E96 = new Measurement(Value, NumberSeries.E96, NumberSeriesRounding.Nearest, 3);
-            _E192 = new Measurement(Value, NumberSeries.E192, NumberSeriesRounding.Nearest, 3);
+            _E6 = new Measurement(Value, NumberSeries.E6, NumberSeriesRounding.Nearest, -2);
+            _E12 = new Measurement(Value, NumberSeries.E12, NumberSeriesRounding.Nearest, -2);
+            _E24 = new Measurement(Value, NumberSeries.E24, NumberSeriesRounding.Nearest, -2);
+            _E48 = new Measurement(Value, NumberSeries.E48, NumberSeriesRounding.Nearest, -3);
+            _E96 = new Measurement(Value, NumberSeries.E96, NumberSeriesRounding.Nearest, -3);
+            _E192 = new Measurement(Value, NumberSeries.E192, NumberSeriesRounding.Nearest, -3);
             base.StoreWrite(nameof(Value));
         }
     }

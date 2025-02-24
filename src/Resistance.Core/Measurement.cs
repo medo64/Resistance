@@ -4,6 +4,7 @@ using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Text;
 
 /// <summary>
 /// Measurement instance.
@@ -13,7 +14,10 @@ public readonly struct Measurement : IEquatable<Measurement> {
     /// <summary>
     /// Creates a new instance.
     /// </summary>
-    public Measurement() { }
+    public Measurement() {
+        Value = null;
+        DigitCount = -3;
+    }
 
     /// <summary>
     /// Creates a new instance.
@@ -21,19 +25,29 @@ public readonly struct Measurement : IEquatable<Measurement> {
     /// <param name="value">Value.</param>
     public Measurement(decimal? value) {
         Value = value;
+        DigitCount = -3;
     }
 
     /// <summary>
     /// Creates a new instance.
     /// </summary>
     /// <param name="value">Value.</param>
+    /// <param name="series">Series.</param>
+    /// <param name="rounding">Rounding.</param>
+    /// <param name="digitCount">Negative number uses rounding using significant digits, while positive number controls how many decimal places to use.</param>
     internal Measurement(decimal? value, NumberSeries series, NumberSeriesRounding rounding, int? digitCount) {
         if (series == NumberSeries.None) {
             Value = value;
         } else {
             Value = RoundToSeries(value, series, rounding);
         }
-        DigitCount = digitCount is not null ? Math.Min(Math.Max(digitCount.Value, 0), 18) : null;
+        if (digitCount is null) {
+            DigitCount = null;
+        } else if (digitCount >= 0) {
+            DigitCount = Math.Min(Math.Max(digitCount.Value, 0), 6);  // 0 - 6 decimal digits
+        } else {
+            DigitCount = Math.Min(Math.Max(digitCount.Value, -6), 0);  // 1 to 6 significant digits
+        }
     }
 
     private readonly decimal? Value;
@@ -66,22 +80,72 @@ public readonly struct Measurement : IEquatable<Measurement> {
     #region Formatting
 
     public override string ToString() {
-        return ToString(NumberFormatInfo.CurrentInfo);
-    }
-
-    public string ToString(IFormatProvider? provider) {
         if (Value is null) { return string.Empty; }
-        var format = (DigitCount is null) ? "0.###" : "0." + new string('0', DigitCount.Value);
-        return Value.Value.ToString(format, provider);
+        return Value.Value.ToString(CultureInfo.InvariantCulture);
     }
 
-    public string ToString([StringSyntax(StringSyntaxAttribute.NumericFormat)] string? format) {
-        return (Value is not null) ? Value.Value.ToString(format, NumberFormatInfo.CurrentInfo) : string.Empty;
+    public string ToString(CultureInfo? provider, string unit) {
+        if (Value is null) { return ""; }
+        provider ??= CultureInfo.CurrentCulture;
+
+        var value = Value.Value;
+        var number = value;
+        return number switch {
+            >= 1_000_000_000_000_000_000_000_000_000m => GetString(provider, number / 1_000_000_000_000_000_000_000_000_000m, 'R', unit),
+            >= 1_000_000_000_000_000_000_000_000m => GetString(provider, number / 1_000_000_000_000_000_000_000_000m, 'Y', unit),
+            >= 1_000_000_000_000_000_000_000m => GetString(provider, number / 1_000_000_000_000_000_000_000m, 'Z', unit),
+            >= 1_000_000_000_000_000_000m => GetString(provider, number / 1_000_000_000_000_000_000m, 'E', unit),
+            >= 1_000_000_000_000_000m => GetString(provider, number / 1_000_000_000_000_000m, 'P', unit),
+            >= 1_000_000_000_000m => GetString(provider, number / 1_000_000_000_000m, 'T', unit),
+            >= 1_000_000_000m => GetString(provider, number / 1_000_000_000m, 'G', unit),
+            >= 1_000_000m => GetString(provider, number / 1_000_000m, 'M', unit),
+            >= 1000m => GetString(provider, number / 1_000m, 'k', unit),
+            >= 1m => GetString(provider, number, ' ', unit),
+            >= 0.001m => GetString(provider, number * 1_000m, 'm', unit),
+            >= 0.000_001m => GetString(provider, number * 1_000_000m, 'μ', unit),
+            >= 0.000_000_001m => GetString(provider, number * 1_000_000_000m, 'n', unit),
+            >= 0.000_000_000_001m => GetString(provider, number * 1_000_000_000_000m, 'p', unit),
+            >= 0.000_000_000_000_001m => GetString(provider, number * 1_000_000_000_000_000m, 'f', unit),
+            >= 0.000_000_000_000_000_001m => GetString(provider, number * 1_000_000_000_000_000_000m, 'a', unit),
+            >= 0.000_000_000_000_000_000_001m => GetString(provider, number * 1_000_000_000_000_000_000_000m, 'z', unit),
+            >= 0.000_000_000_000_000_000_000_001m => GetString(provider, number * 1_000_000_000_000_000_000_000_000m, 'y', unit),
+            _ => GetString(provider, number * 1_000_000_000_000_000_000_000_000_000m, 'r', unit),
+        };
     }
 
-    public string ToString([StringSyntax(StringSyntaxAttribute.NumericFormat)] string? format, IFormatProvider? provider) {
-        return (Value is not null) ? Value.Value.ToString(format, provider) : string.Empty;
+    private string GetString(CultureInfo provider, decimal scaledValue, char si, string unit) {
+        var sb = new StringBuilder();
+
+        if (DigitCount is null) {  // decimal digits
+            sb.Append(scaledValue.ToString("0.###", provider));
+        } else if (DigitCount >= 0) {  // decimal digits
+            sb.AppendFormat(provider, "0." + new string('0', DigitCount.Value), scaledValue);
+        } else {  // significant digits
+            var index = 0;
+            while (scaledValue >= 10) {
+                index -= 1;
+                scaledValue /= 10m;
+            }
+            var lastIndex = Math.Max(index + (-DigitCount.Value) - 1, 0);
+            for (var i = index; i <= lastIndex; i++) {
+                var digit = (i != lastIndex)
+                          ? Math.Floor((decimal)scaledValue)
+                          : Math.Round((decimal)scaledValue, 0, MidpointRounding.AwayFromZero);
+                sb.Append(digit);
+                if ((i == 0) && (i != lastIndex)) { sb.Append(provider.NumberFormat.NumberDecimalSeparator); }
+                scaledValue -= digit;
+                scaledValue *= 10;
+            }
+        }
+
+        if (string.IsNullOrEmpty(unit)) {
+            if (si != ' ') { sb.Append(si); }
+        } else {
+            sb.Append(" " + (si + unit).Trim());
+        }
+        return sb.ToString();
     }
+
 
     #endregion
 
