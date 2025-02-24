@@ -9,11 +9,14 @@
     Width="800" Height="480"
     Title="Resistance">
 
-    <Grid ColumnDefinitions="*, 4, 160, *" Name="grdMain">
+    <Grid ColumnDefinitions="*, 4, *" Name="grdMain">
         <ListBox Grid.Column="0" Name="lsbCalculators" SelectionChanged="lsbCalculators_SelectionChanged"></ListBox>
         <GridSplitter Grid.Column="1" ResizeDirection="Columns" />
         <Border Grid.Column="2" Padding="4">
-            <StackPanel Name="pnlMeasurements" />
+            <StackPanel Orientation="Vertical" >
+                <StackPanel Orientation="Horizontal" Name="pnlGroups" />
+                <StackPanel Orientation="Horizontal" Name="pnlOther" />
+            </StackPanel>
         </Border>
         <Border Grid.Column="3" Padding="4">
         </Border>

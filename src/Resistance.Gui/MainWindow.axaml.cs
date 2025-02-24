@@ -35,26 +35,27 @@ internal partial class MainWindow : Window {
 
 
     private void lsbCalculators_SelectionChanged(object? sender, SelectionChangedEventArgs e) {
-        pnlMeasurements.Children.Clear();
+        pnlGroups.Children.Clear();
         if (lsbCalculators.SelectedItem is not Calculator calculator) { return; }
 
         var blockUpdates = true;
 
-        var lastCategory = "";
-        var pnlGroup = new StackPanel() { };
-        pnlMeasurements.Children.Add(pnlGroup);
+        string? lastCategory = null;
+        StackPanel? pnlGroup = null;
 
         foreach (var measurementName in calculator.GetMeasurementNames()) {
             var category = Calculator.GetGuiCategory(calculator, measurementName);
-            if (category != lastCategory) {
-                pnlGroup = new StackPanel() { };
-                pnlMeasurements.Children.Add(pnlGroup);
+            if ((category != lastCategory) || (pnlGroup is null)) {
+                pnlGroup = new StackPanel() {
+                    Margin = new(4, 0, 4, 0),
+                    Width = 160,
+                };
+                pnlGroups.Children.Add(pnlGroup);
 
                 var categoryTextBlock = new TextBlock() {
                     Foreground = BrushHelpers.SystemBaseMediumHighColor,
                     HorizontalAlignment = HorizontalAlignment.Center,
-                    Margin = new(0, 16, 0, 0),
-                    Text = "- " + category + " -",
+                    Text = !string.IsNullOrEmpty(category) ? "- " + category + " -" : "",
                 };
                 pnlGroup.Children.Add(categoryTextBlock);
 
@@ -91,10 +92,10 @@ internal partial class MainWindow : Window {
     private void UpdateAll(ref bool blockUpdates, Calculator calculator) {
         blockUpdates = true;
 
-        foreach (var child in pnlMeasurements.Children) {
-            if (child is StackPanel group) {
-                foreach (var element in group.Children) {
-                    if (element is TextBox textBox) {
+        foreach (var outerElement in pnlGroups.Children) {
+            if (outerElement is StackPanel group) {
+                foreach (var innerElement in group.Children) {
+                    if (innerElement is TextBox textBox) {
                         if (textBox.Tag is not string measurementName) { continue; }
                         var value = Calculator.GetGuiValue(calculator, measurementName);
                         if (textBox.Text != value) { textBox.Text = value; }
