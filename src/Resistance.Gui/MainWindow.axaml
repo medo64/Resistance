@@ -10,10 +10,19 @@
     Title="Resistance">
 
     <Grid ColumnDefinitions="*, 4, *" Name="grdMain">
+        <Grid.Styles>
+            <Style Selector="TextBox[IsReadOnly=True]:focus /template/ Border">
+                <Setter Property="Background" Value="{DynamicResource SystemChromeLowColor}" />
+            </Style>
+            <Style Selector="TextBox[IsReadOnly=True] /template/ Border">
+                <Setter Property="Background" Value="{DynamicResource SystemChromeLowColor}" />
+            </Style>
+        </Grid.Styles>
+
         <ListBox Grid.Column="0" Name="lsbCalculators" SelectionChanged="lsbCalculators_SelectionChanged"></ListBox>
         <GridSplitter Grid.Column="1" ResizeDirection="Columns" />
         <Border Grid.Column="2" Padding="4">
-            <StackPanel Orientation="Vertical" >
+            <StackPanel Orientation="Vertical">
                 <StackPanel Orientation="Horizontal" Name="pnlGroups" />
                 <StackPanel Orientation="Horizontal" Name="pnlOther" />
             </StackPanel>
