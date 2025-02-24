@@ -52,7 +52,7 @@ public abstract class Calculator {
     /// <summary>
     /// Returns previously stored value.
     /// </summary>
-    protected decimal? StoreRead(string measurementName, decimal? defaultValue = null) {
+    protected Measurement StoreRead(string measurementName, Measurement defaultValue) {
         var calculatorName = GetType().Name;
         var key = calculatorName + "." + measurementName;
 
@@ -73,12 +73,12 @@ public abstract class Calculator {
         var key = calculatorName + "." + measurementName;
 
         var valueProperty = calculatorType.GetProperty(measurementName);
-        var value = valueProperty?.GetValue(this) as decimal?;
+        var value = (Measurement)valueProperty?.GetValue(this)!;
 
-        if (value is null) {
+        if (value.IsNull) {
             Config.Write(calculatorName + "." + measurementName, "");
         } else {
-            Config.Write(calculatorName + "." + measurementName, value.Value.ToString(CultureInfo.InvariantCulture));
+            Config.Write(calculatorName + "." + measurementName, value.ToString(CultureInfo.InvariantCulture));
         }
     }
 
@@ -151,13 +151,13 @@ public abstract class Calculator {
         var measurementProperty = calculatorType.GetProperty(measurementName);
         if (measurementProperty is null) { return ""; }
 
-        var value = measurementProperty.GetValue(calculator) as decimal?;
+        var value = (Measurement)measurementProperty.GetValue(calculator)!;
         var unit = GetGuiUnit(calculator, measurementName);
 
-        if (value is null) {
+        if (value.IsNull) {
             return "";
         } else {
-            var number = value.Value;
+            var number = (decimal)value;
             return number switch {
                 >= 1_000_000_000_000_000_000_000_000_000m => (number / 1_000_000_000_000_000_000_000_000_000m).ToString("0.###", CultureInfo.CurrentCulture) + " R" + unit,
                 >= 1_000_000_000_000_000_000_000_000m => (number / 1_000_000_000_000_000_000_000_000m).ToString("0.###", CultureInfo.CurrentCulture) + " Y" + unit,
@@ -207,7 +207,7 @@ public abstract class Calculator {
         var measurementProperty = calculatorType.GetProperty(measurementName);
         if (measurementProperty is null) { return; }
 
-        if (decimal.TryParse(sbValue.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out var value)) {
+        if (decimal.TryParse(sbValue.ToString(), NumberStyles.Any, CultureInfo.CurrentCulture, out var value)) {
             var suffix = sbSuffix.ToString();
             var unit = GetGuiUnit(calculator, measurementName);
             if (suffix.Length >= 1) {
@@ -227,20 +227,23 @@ public abstract class Calculator {
                 'G' => 1_000_000_000m,
                 'M' => 1_000_000m,
                 'k' => 1_000m,
-                '"' => 0.001m,
-                'm' => 0.000_001m,
-                'μ' or 'u' => 0.000_000_001m,
-                'n' => 0.000_000_000_001m,
-                'p' => 0.000_000_000_000_001m,
-                'f' => 0.000_000_000_000_000_001m,
-                'a' => 0.000_000_000_000_000_000_001m,
-                'z' => 0.000_000_000_000_000_000_000_001m,
-                'y' => 0.000_000_000_000_000_000_000_000_001m,
-                'r' => 0.000_000_000_000_000_000_000_000_000_001m,
+                'm' => 0.001m,
+                'μ' or 'u' => 0.000_001m,
+                'n' => 0.000_000_001m,
+                'p' => 0.000_000_000_001m,
+                'f' => 0.000_000_000_000_001m,
+                'a' => 0.000_000_000_000_000_001m,
+                'z' => 0.000_000_000_000_000_000_001m,
+                'y' => 0.000_000_000_000_000_000_000_001m,
+                'r' => 0.000_000_000_000_000_000_000_000_001m,
                 _ => 1,
             };
 
-            measurementProperty.SetValue(calculator, value * multiplier);
+            var newValue = new Measurement(value * multiplier);
+            var oldValue = (Measurement)measurementProperty.GetValue(calculator)!;
+            if (newValue != oldValue) {
+                measurementProperty.SetValue(calculator, newValue);
+            }
         }
     }
 
