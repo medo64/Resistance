@@ -94,17 +94,6 @@ public abstract class Calculator {
     #endregion Store
 
 
-    #region Static
-
-    private readonly static ReadOnlyCollection<Calculator> _AllCalculators = new([new OhmLaw()]);
-    /// <summary>
-    /// Returns all available calculators
-    /// </summary>
-    public static ReadOnlyCollection<Calculator> AllCalculators => _AllCalculators;
-
-    #endregion Static
-
-
     #region Gui
 
     public static string GetGuiCategory(Calculator calculator, string measurementName) {
@@ -159,26 +148,35 @@ public abstract class Calculator {
         } else {
             var number = (decimal)value;
             return number switch {
-                >= 1_000_000_000_000_000_000_000_000_000m => (number / 1_000_000_000_000_000_000_000_000_000m).ToString("0.###", CultureInfo.CurrentCulture) + " R" + unit,
-                >= 1_000_000_000_000_000_000_000_000m => (number / 1_000_000_000_000_000_000_000_000m).ToString("0.###", CultureInfo.CurrentCulture) + " Y" + unit,
-                >= 1_000_000_000_000_000_000_000m => (number / 1_000_000_000_000_000_000_000m).ToString("0.###", CultureInfo.CurrentCulture) + " Z" + unit,
-                >= 1_000_000_000_000_000_000m => (number / 1_000_000_000_000_000_000m).ToString("0.###", CultureInfo.CurrentCulture) + " E" + unit,
-                >= 1_000_000_000_000_000m => (number / 1_000_000_000_000_000m).ToString("0.###", CultureInfo.CurrentCulture) + " P" + unit,
-                >= 1_000_000_000_000m => (number / 1_000_000_000_000m).ToString("0.###", CultureInfo.CurrentCulture) + " T" + unit,
-                >= 1_000_000_000m => (number / 1_000_000_000m).ToString("0.###", CultureInfo.CurrentCulture) + " G" + unit,
-                >= 1_000_000m => (number / 1_000_000m).ToString("0.###", CultureInfo.CurrentCulture) + " M" + unit,
-                >= 1000m => (number / 1_000m).ToString("0.###", CultureInfo.CurrentCulture) + " k" + unit,
-                >= 1m => number.ToString("0.###", CultureInfo.CurrentCulture) + " " + unit,
-                >= 0.001m => (number * 1_000m).ToString("0.###", CultureInfo.CurrentCulture) + " m" + unit,
-                >= 0.000_001m => (number * 1_000_000m).ToString("0.###", CultureInfo.CurrentCulture) + " μ" + unit,
-                >= 0.000_000_001m => (number * 1_000_000_000m).ToString("0.###", CultureInfo.CurrentCulture) + " n" + unit,
-                >= 0.000_000_000_001m => (number * 1_000_000_000_000m).ToString("0.###", CultureInfo.CurrentCulture) + " p" + unit,
-                >= 0.000_000_000_000_001m => (number * 1_000_000_000_000_000m).ToString("0.###", CultureInfo.CurrentCulture) + " f" + unit,
-                >= 0.000_000_000_000_000_001m => (number * 1_000_000_000_000_000_000m).ToString("0.###", CultureInfo.CurrentCulture) + " a" + unit,
-                >= 0.000_000_000_000_000_000_001m => (number * 1_000_000_000_000_000_000_000m).ToString("0.###", CultureInfo.CurrentCulture) + " z" + unit,
-                >= 0.000_000_000_000_000_000_000_001m => (number * 1_000_000_000_000_000_000_000_000m).ToString("0.###", CultureInfo.CurrentCulture) + " y" + unit,
-                _ => (number * 1_000_000_000_000_000_000_000_000_000m).ToString("0.###", CultureInfo.CurrentCulture) + " r" + unit,
-            };
+                >= 1_000_000_000_000_000_000_000_000_000m => GetString(number / 1_000_000_000_000_000_000_000_000_000m, 'R', unit),
+                >= 1_000_000_000_000_000_000_000_000m => GetString(number / 1_000_000_000_000_000_000_000_000m, 'Y', unit),
+                >= 1_000_000_000_000_000_000_000m => GetString(number / 1_000_000_000_000_000_000_000m, 'Z', unit),
+                >= 1_000_000_000_000_000_000m => GetString(number / 1_000_000_000_000_000_000m, 'E', unit),
+                >= 1_000_000_000_000_000m => GetString(number / 1_000_000_000_000_000m, 'P', unit),
+                >= 1_000_000_000_000m => GetString(number / 1_000_000_000_000m, 'T', unit),
+                >= 1_000_000_000m => GetString(number / 1_000_000_000m, 'G', unit),
+                >= 1_000_000m => GetString(number / 1_000_000m, 'M', unit),
+                >= 1000m => GetString(number / 1_000m, 'k', unit),
+                >= 1m => GetString(number, ' ', unit),
+                >= 0.001m => GetString(number * 1_000m, 'm', unit),
+                >= 0.000_001m => GetString(number * 1_000_000m, 'μ', unit),
+                >= 0.000_000_001m => GetString(number * 1_000_000_000m, 'n', unit),
+                >= 0.000_000_000_001m => GetString(number * 1_000_000_000_000m, 'p', unit),
+                >= 0.000_000_000_000_001m => GetString(number * 1_000_000_000_000_000m, 'f', unit),
+                >= 0.000_000_000_000_000_001m => GetString(number * 1_000_000_000_000_000_000m, 'a', unit),
+                >= 0.000_000_000_000_000_000_001m => GetString(number * 1_000_000_000_000_000_000_000m, 'z', unit),
+                >= 0.000_000_000_000_000_000_000_001m => GetString(number * 1_000_000_000_000_000_000_000_000m, 'y', unit),
+                _ => GetString(number * 1_000_000_000_000_000_000_000_000_000m, 'r', unit),
+            }
+        ;
+        }
+    }
+
+    private static string GetString(Measurement value, char si, string unit) {
+        if (string.IsNullOrEmpty(unit)) {
+            return value.ToString(CultureInfo.CurrentCulture) + si;
+        } else {
+            return value.ToString(CultureInfo.CurrentCulture) + " " + (si + unit).Trim();
         }
     }
 
@@ -266,5 +264,20 @@ public abstract class Calculator {
     }
 
     #endregion Gui
+
+
+    #region Static
+
+    private readonly static ReadOnlyCollection<Calculator> _AllCalculators = new([
+        new ESeries(),
+        new OhmLaw(),
+    ]);
+
+    /// <summary>
+    /// Returns all available calculators
+    /// </summary>
+    public static ReadOnlyCollection<Calculator> AllCalculators => _AllCalculators;
+
+    #endregion Static
 
 }
