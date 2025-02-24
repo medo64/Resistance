@@ -46,22 +46,26 @@ internal partial class MainWindow : Window {
         foreach (var measurementName in calculator.GetMeasurementNames()) {
             var category = Calculator.GetGuiCategory(calculator, measurementName);
             if ((category != lastCategory) || (pnlGroup is null)) {
-                pnlGroup = new StackPanel() {
-                    Margin = new(8, 0, 8, 0),
-                    Width = 160,
-                };
-                pnlGroups.Children.Add(pnlGroup);
+                lastCategory = category;
+                var isContinuingCategory = category.StartsWith('~');
+                category = category.TrimStart('~');
+
+                if (!isContinuingCategory || (pnlGroup is null)) {
+                    pnlGroup = new StackPanel() {
+                        Margin = new(8, 0, 8, 0),
+                        Width = 160,
+                    };
+                    pnlGroups.Children.Add(pnlGroup);
+                }
 
                 var categoryTextBlock = new TextBlock() {
                     FontSize = FontSize * 0.8f,
                     Foreground = BrushHelpers.SystemBaseMediumHighColor,
                     HorizontalAlignment = HorizontalAlignment.Center,
-                    Margin = new(0, 0, 0, 8),
+                    Margin = new(0, isContinuingCategory ? 16 : 0, 0, 8),
                     Text = !string.IsNullOrEmpty(category) ? "- " + category + " -" : "",
                 };
                 pnlGroup.Children.Add(categoryTextBlock);
-
-                lastCategory = category;
             }
 
             var displayName = Calculator.GetGuiDisplayName(calculator, measurementName) + ":";
