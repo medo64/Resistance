@@ -4,9 +4,10 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
     x:Class="ResiCalc.MainWindow"
-    Icon="/Assets/App.ico"
     MinWidth="600" MinHeight="240"
     Width="800" Height="480"
+    WindowState="Maximized"
+    Icon="/Assets/App.ico"
     Title="Resistance">
 
     <Grid ColumnDefinitions="*, 4, *" Name="grdMain">
