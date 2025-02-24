@@ -24,62 +24,173 @@ public class ESeries : Calculator {
         get { return _Value; }
         set {
             _Value = value;
-            _E6 = new Measurement(Value, NumberSeries.E6, NumberSeriesRounding.Nearest, -2);
-            _E12 = new Measurement(Value, NumberSeries.E12, NumberSeriesRounding.Nearest, -2);
-            _E24 = new Measurement(Value, NumberSeries.E24, NumberSeriesRounding.Nearest, -2);
-            _E48 = new Measurement(Value, NumberSeries.E48, NumberSeriesRounding.Nearest, -3);
-            _E96 = new Measurement(Value, NumberSeries.E96, NumberSeriesRounding.Nearest, -3);
-            _E192 = new Measurement(Value, NumberSeries.E192, NumberSeriesRounding.Nearest, -3);
+            _E6d = new Measurement(Value, NumberSeries.E6, NumberSeriesRounding.Down, -2);
+            _E12d = new Measurement(Value, NumberSeries.E12, NumberSeriesRounding.Down, -2);
+            _E24d = new Measurement(Value, NumberSeries.E24, NumberSeriesRounding.Down, -2);
+            _E48d = new Measurement(Value, NumberSeries.E48, NumberSeriesRounding.Down, -3);
+            _E96d = new Measurement(Value, NumberSeries.E96, NumberSeriesRounding.Down, -3);
+            _E192d = new Measurement(Value, NumberSeries.E192, NumberSeriesRounding.Down, -3);
+            _E6n = new Measurement(Value, NumberSeries.E6, NumberSeriesRounding.Nearest, -2);
+            _E12n = new Measurement(Value, NumberSeries.E12, NumberSeriesRounding.Nearest, -2);
+            _E24n = new Measurement(Value, NumberSeries.E24, NumberSeriesRounding.Nearest, -2);
+            _E48n = new Measurement(Value, NumberSeries.E48, NumberSeriesRounding.Nearest, -3);
+            _E96n = new Measurement(Value, NumberSeries.E96, NumberSeriesRounding.Nearest, -3);
+            _E192n = new Measurement(Value, NumberSeries.E192, NumberSeriesRounding.Nearest, -3);
+            _E6u = new Measurement(Value, NumberSeries.E6, NumberSeriesRounding.Up, -2);
+            _E12u = new Measurement(Value, NumberSeries.E12, NumberSeriesRounding.Up, -2);
+            _E24u = new Measurement(Value, NumberSeries.E24, NumberSeriesRounding.Up, -2);
+            _E48u = new Measurement(Value, NumberSeries.E48, NumberSeriesRounding.Up, -3);
+            _E96u = new Measurement(Value, NumberSeries.E96, NumberSeriesRounding.Up, -3);
+            _E192u = new Measurement(Value, NumberSeries.E192, NumberSeriesRounding.Up, -3);
             base.StoreWrite(nameof(Value));
         }
     }
 
-    private Measurement _E6;
-    [Category("Rounded")]
+
+    private Measurement _E6d;
+    [Category("Rounded down")]
     [DisplayName("E6 (±20%)")]
     [MeasurementUnit("")]
-    public Measurement E6 {
-        get { return _E6; }
+    public Measurement E6d {
+        get { return _E6d; }
     }
 
-    private Measurement _E12;
-    [Category("Rounded")]
+    private Measurement _E12d;
+    [Category("Rounded down")]
     [DisplayName("E12 (±10%)")]
     [MeasurementUnit("")]
-    public Measurement E12 {
-        get { return _E12; }
+    public Measurement E12d {
+        get { return _E12d; }
     }
 
-    private Measurement _E24;
-    [Category("Rounded")]
+    private Measurement _E24d;
+    [Category("Rounded down")]
     [DisplayName("E24 (±5%)")]
     [MeasurementUnit("")]
-    public Measurement E24 {
-        get { return _E24; }
+    public Measurement E24d {
+        get { return _E24d; }
     }
 
-    private Measurement _E48;
-    [Category("Rounded")]
+    private Measurement _E48d;
+    [Category("Rounded down")]
     [DisplayName("E48 (±2%)")]
     [MeasurementUnit("")]
-    public Measurement E48 {
-        get { return _E48; }
+    public Measurement E48d {
+        get { return _E48d; }
     }
 
-    private Measurement _E96;
-    [Category("Rounded")]
+    private Measurement _E96d;
+    [Category("Rounded down")]
     [DisplayName("E96 (±1%)")]
     [MeasurementUnit("")]
-    public Measurement E96 {
-        get { return _E96; }
+    public Measurement E96d {
+        get { return _E96d; }
     }
 
-    private Measurement _E192;
-    [Category("Rounded")]
+    private Measurement _E192d;
+    [Category("Rounded down")]
     [DisplayName("E192 (±0.5%)")]
     [MeasurementUnit("")]
-    public Measurement E192 {
-        get { return _E192; }
+    public Measurement E192d {
+        get { return _E192d; }
+    }
+
+
+    private Measurement _E6n;
+    [Category("Rounded to nearest")]
+    [DisplayName("E6 (±20%)")]
+    [MeasurementUnit("")]
+    public Measurement E6n {
+        get { return _E6n; }
+    }
+
+    private Measurement _E12n;
+    [Category("Rounded to nearest")]
+    [DisplayName("E12 (±10%)")]
+    [MeasurementUnit("")]
+    public Measurement E12n {
+        get { return _E12n; }
+    }
+
+    private Measurement _E24n;
+    [Category("Rounded to nearest")]
+    [DisplayName("E24 (±5%)")]
+    [MeasurementUnit("")]
+    public Measurement E24n {
+        get { return _E24n; }
+    }
+
+    private Measurement _E48n;
+    [Category("Rounded to nearest")]
+    [DisplayName("E48 (±2%)")]
+    [MeasurementUnit("")]
+    public Measurement E48n {
+        get { return _E48n; }
+    }
+
+    private Measurement _E96n;
+    [Category("Rounded to nearest")]
+    [DisplayName("E96 (±1%)")]
+    [MeasurementUnit("")]
+    public Measurement E96n {
+        get { return _E96n; }
+    }
+
+    private Measurement _E192n;
+    [Category("Rounded to nearest")]
+    [DisplayName("E192 (±0.5%)")]
+    [MeasurementUnit("")]
+    public Measurement E192n {
+        get { return _E192n; }
+    }
+
+
+    private Measurement _E6u;
+    [Category("Rounded up")]
+    [DisplayName("E6 (±20%)")]
+    [MeasurementUnit("")]
+    public Measurement E6u {
+        get { return _E6u; }
+    }
+
+    private Measurement _E12u;
+    [Category("Rounded up")]
+    [DisplayName("E12 (±10%)")]
+    [MeasurementUnit("")]
+    public Measurement E12u {
+        get { return _E12u; }
+    }
+
+    private Measurement _E24u;
+    [Category("Rounded up")]
+    [DisplayName("E24 (±5%)")]
+    [MeasurementUnit("")]
+    public Measurement E24u {
+        get { return _E24u; }
+    }
+
+    private Measurement _E48u;
+    [Category("Rounded up")]
+    [DisplayName("E48 (±2%)")]
+    [MeasurementUnit("")]
+    public Measurement E48u {
+        get { return _E48u; }
+    }
+
+    private Measurement _E96u;
+    [Category("Rounded up")]
+    [DisplayName("E96 (±1%)")]
+    [MeasurementUnit("")]
+    public Measurement E96u {
+        get { return _E96u; }
+    }
+
+    private Measurement _E192u;
+    [Category("Rounded up")]
+    [DisplayName("E192 (±0.5%)")]
+    [MeasurementUnit("")]
+    public Measurement E192u {
+        get { return _E192u; }
     }
 
 
@@ -89,12 +200,24 @@ public class ESeries : Calculator {
     public override ReadOnlyCollection<string> GetMeasurementNames() {
         return new ReadOnlyCollection<string>([
             nameof(Value),
-            nameof(E6),
-            nameof(E12),
-            nameof(E24),
-            nameof(E48),
-            nameof(E96),
-            nameof(E192),
+            nameof(E6d),
+            nameof(E12d),
+            nameof(E24d),
+            nameof(E48d),
+            nameof(E96d),
+            nameof(E192d),
+            nameof(E6n),
+            nameof(E12n),
+            nameof(E24n),
+            nameof(E48n),
+            nameof(E96n),
+            nameof(E192n),
+            nameof(E6u),
+            nameof(E12u),
+            nameof(E24u),
+            nameof(E48u),
+            nameof(E96u),
+            nameof(E192u),
         ]);
     }
 

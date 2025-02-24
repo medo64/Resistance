@@ -132,6 +132,17 @@ public abstract class Calculator {
         return measurementName;
     }
 
+    public static bool GetGuiIsReadonly(Calculator calculator, string measurementName) {
+        ArgumentNullException.ThrowIfNull(calculator);
+        ArgumentNullException.ThrowIfNull(measurementName);
+
+        var calculatorType = calculator.GetType();
+        var measurementProperty = calculatorType.GetProperty(measurementName);
+        if (measurementProperty is null) { return true; }
+
+        return !measurementProperty.CanWrite;
+    }
+
     public static string GetGuiValue(Calculator calculator, string measurementName) {
         ArgumentNullException.ThrowIfNull(calculator);
         ArgumentNullException.ThrowIfNull(measurementName);

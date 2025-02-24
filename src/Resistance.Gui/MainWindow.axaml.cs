@@ -47,14 +47,16 @@ internal partial class MainWindow : Window {
             var category = Calculator.GetGuiCategory(calculator, measurementName);
             if ((category != lastCategory) || (pnlGroup is null)) {
                 pnlGroup = new StackPanel() {
-                    Margin = new(4, 0, 4, 0),
+                    Margin = new(8, 0, 8, 0),
                     Width = 160,
                 };
                 pnlGroups.Children.Add(pnlGroup);
 
                 var categoryTextBlock = new TextBlock() {
+                    FontSize = FontSize * 0.8f,
                     Foreground = BrushHelpers.SystemBaseMediumHighColor,
                     HorizontalAlignment = HorizontalAlignment.Center,
+                    Margin = new(0, 0, 0, 8),
                     Text = !string.IsNullOrEmpty(category) ? "- " + category + " -" : "",
                 };
                 pnlGroup.Children.Add(categoryTextBlock);
@@ -70,19 +72,23 @@ internal partial class MainWindow : Window {
             };
             pnlGroup.Children.Add(displayNameTextBlock);
 
+            var isReadonly = Calculator.GetGuiIsReadonly(calculator, measurementName);
             var value = Calculator.GetGuiValue(calculator, measurementName);
             var valueTextBox = new TextBox() {
                 FontSize = FontSize * 1.3f,
+                IsReadOnly = isReadonly,
                 Margin = new Thickness(0, 0, 0, 16),
                 Text = value,
                 TextAlignment = TextAlignment.Right,
                 Tag = measurementName,
             };
-            valueTextBox.LostFocus += (sender, e) => {
-                if (blockUpdates) { return; }
-                Calculator.SetGuiValue(calculator, measurementName, valueTextBox.Text);
-                UpdateAll(ref blockUpdates, calculator);
-            };
+            if (!isReadonly) {
+                valueTextBox.LostFocus += (sender, e) => {
+                    if (blockUpdates) { return; }
+                    Calculator.SetGuiValue(calculator, measurementName, valueTextBox.Text);
+                    UpdateAll(ref blockUpdates, calculator);
+                };
+            }
             pnlGroup.Children.Add(valueTextBox);
         }
 
