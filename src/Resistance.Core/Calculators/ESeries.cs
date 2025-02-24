@@ -24,18 +24,21 @@ public class ESeries : Calculator {
         get { return _Value; }
         set {
             _Value = value;
+            _E3d = new Measurement(Value, NumberSeries.E3, NumberSeriesRounding.Down, -2);
             _E6d = new Measurement(Value, NumberSeries.E6, NumberSeriesRounding.Down, -2);
             _E12d = new Measurement(Value, NumberSeries.E12, NumberSeriesRounding.Down, -2);
             _E24d = new Measurement(Value, NumberSeries.E24, NumberSeriesRounding.Down, -2);
             _E48d = new Measurement(Value, NumberSeries.E48, NumberSeriesRounding.Down, -3);
             _E96d = new Measurement(Value, NumberSeries.E96, NumberSeriesRounding.Down, -3);
             _E192d = new Measurement(Value, NumberSeries.E192, NumberSeriesRounding.Down, -3);
+            _E3n = new Measurement(Value, NumberSeries.E3, NumberSeriesRounding.Nearest, -2);
             _E6n = new Measurement(Value, NumberSeries.E6, NumberSeriesRounding.Nearest, -2);
             _E12n = new Measurement(Value, NumberSeries.E12, NumberSeriesRounding.Nearest, -2);
             _E24n = new Measurement(Value, NumberSeries.E24, NumberSeriesRounding.Nearest, -2);
             _E48n = new Measurement(Value, NumberSeries.E48, NumberSeriesRounding.Nearest, -3);
             _E96n = new Measurement(Value, NumberSeries.E96, NumberSeriesRounding.Nearest, -3);
             _E192n = new Measurement(Value, NumberSeries.E192, NumberSeriesRounding.Nearest, -3);
+            _E3u = new Measurement(Value, NumberSeries.E3, NumberSeriesRounding.Up, -2);
             _E6u = new Measurement(Value, NumberSeries.E6, NumberSeriesRounding.Up, -2);
             _E12u = new Measurement(Value, NumberSeries.E12, NumberSeriesRounding.Up, -2);
             _E24u = new Measurement(Value, NumberSeries.E24, NumberSeriesRounding.Up, -2);
@@ -46,6 +49,14 @@ public class ESeries : Calculator {
         }
     }
 
+
+    private Measurement _E3d;
+    [Category("Rounded down")]
+    [DisplayName("E3 (±40%)")]
+    [MeasurementUnit("")]
+    public Measurement E3d {
+        get { return _E3d; }
+    }
 
     private Measurement _E6d;
     [Category("Rounded down")]
@@ -96,6 +107,14 @@ public class ESeries : Calculator {
     }
 
 
+    private Measurement _E3n;
+    [Category("Rounded to nearest")]
+    [DisplayName("E3 (±40%)")]
+    [MeasurementUnit("")]
+    public Measurement E3n {
+        get { return _E3n; }
+    }
+
     private Measurement _E6n;
     [Category("Rounded to nearest")]
     [DisplayName("E6 (±20%)")]
@@ -144,6 +163,14 @@ public class ESeries : Calculator {
         get { return _E192n; }
     }
 
+
+    private Measurement _E3u;
+    [Category("Rounded up")]
+    [DisplayName("E3 (±40%)")]
+    [MeasurementUnit("")]
+    public Measurement E3u {
+        get { return _E3u; }
+    }
 
     private Measurement _E6u;
     [Category("Rounded up")]
@@ -200,18 +227,21 @@ public class ESeries : Calculator {
     public override ReadOnlyCollection<string> GetMeasurementNames() {
         return new ReadOnlyCollection<string>([
             nameof(Value),
+            nameof(E3d),
             nameof(E6d),
             nameof(E12d),
             nameof(E24d),
             nameof(E48d),
             nameof(E96d),
             nameof(E192d),
+            nameof(E3n),
             nameof(E6n),
             nameof(E12n),
             nameof(E24n),
             nameof(E48n),
             nameof(E96n),
             nameof(E192n),
+            nameof(E3u),
             nameof(E6u),
             nameof(E12u),
             nameof(E24u),

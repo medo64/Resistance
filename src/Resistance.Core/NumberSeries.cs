@@ -2,6 +2,7 @@ namespace ResiCalc;
 
 internal enum NumberSeries {
     None = 0,
+    E3 = 3,
     E6 = 6,
     E12 = 12,
     E24 = 24,

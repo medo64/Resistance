@@ -317,18 +317,21 @@ public readonly struct Measurement : IEquatable<Measurement> {
         var value = number.Value;
 
         decimal[] numbers = series switch {
+            NumberSeries.E3 => [
+                                    100, 220, 470,
+                               ],
             NumberSeries.E6 => [
-                                    100, 150, 220, 330, 470, 680
+                                    100, 150, 220, 330, 470, 680,
                                ],
             NumberSeries.E12 => [
                                     100, 120, 150, 180, 220, 270,
-                                    330, 390, 470, 560, 680, 820
+                                    330, 390, 470, 560, 680, 820,
                                 ],
             NumberSeries.E24 => [
                                     100, 110, 120, 130, 150, 160,
                                     180, 200, 220, 240, 270, 300,
                                     330, 360, 390, 430, 470, 510,
-                                    560, 620, 680, 750, 820, 910
+                                    560, 620, 680, 750, 820, 910,
                                 ],
             NumberSeries.E48 => [
                                     100, 105, 110, 115, 121, 127,
@@ -338,7 +341,7 @@ public readonly struct Measurement : IEquatable<Measurement> {
                                     316, 332, 348, 365, 383, 402,
                                     422, 442, 464, 487, 511, 536,
                                     562, 590, 619, 649, 681, 715,
-                                    750, 787, 825, 866, 909, 953
+                                    750, 787, 825, 866, 909, 953,
                                 ],
             NumberSeries.E96 => [
                                     100, 102, 105, 107, 110, 113,
@@ -356,7 +359,7 @@ public readonly struct Measurement : IEquatable<Measurement> {
                                     562, 576, 590, 604, 619, 634,
                                     649, 665, 681, 698, 715, 732,
                                     750, 768, 787, 806, 825, 845,
-                                    866, 887, 909, 931, 953, 976
+                                    866, 887, 909, 931, 953, 976,
                                 ],
             NumberSeries.E192 => [
                                     100, 101, 102, 104, 105, 106,
@@ -390,7 +393,7 @@ public readonly struct Measurement : IEquatable<Measurement> {
                                     750, 759, 768, 777, 787, 796,
                                     806, 816, 825, 835, 845, 856,
                                     866, 876, 887, 898, 909, 919,
-                                    931, 942, 953, 965, 976, 988
+                                    931, 942, 953, 965, 976, 988,
                                 ],
             _ => throw new ArgumentOutOfRangeException(nameof(series), "Unrecognized series."),
         };
