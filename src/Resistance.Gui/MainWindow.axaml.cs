@@ -41,14 +41,33 @@ internal partial class MainWindow : Window {
         var blockUpdates = true;
 
         var lastCategory = "";
+        var pnlGroup = new StackPanel() { };
+        pnlMeasurements.Children.Add(pnlGroup);
+
         foreach (var measurementName in calculator.GetMeasurementNames()) {
+            var category = Calculator.GetGuiCategory(calculator, measurementName);
+            if (category != lastCategory) {
+                pnlGroup = new StackPanel() { };
+                pnlMeasurements.Children.Add(pnlGroup);
+
+                var categoryTextBlock = new TextBlock() {
+                    Foreground = BrushHelpers.SystemBaseMediumHighColor,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    Margin = new(0, 16, 0, 0),
+                    Text = "- " + category + " -",
+                };
+                pnlGroup.Children.Add(categoryTextBlock);
+
+                lastCategory = category;
+            }
+
             var displayName = Calculator.GetGuiDisplayName(calculator, measurementName) + ":";
             var displayNameTextBlock = new TextBlock() {
                 Foreground = BrushHelpers.SystemBaseMediumHighColor,
                 HorizontalAlignment = HorizontalAlignment.Left,
                 Text = displayName,
             };
-            pnlMeasurements.Children.Add(displayNameTextBlock);
+            pnlGroup.Children.Add(displayNameTextBlock);
 
             var value = Calculator.GetGuiValue(calculator, measurementName);
             var valueTextBox = new TextBox() {
@@ -63,7 +82,7 @@ internal partial class MainWindow : Window {
                 Calculator.SetGuiValue(calculator, measurementName, valueTextBox.Text);
                 UpdateAll(ref blockUpdates, calculator);
             };
-            pnlMeasurements.Children.Add(valueTextBox);
+            pnlGroup.Children.Add(valueTextBox);
         }
 
         blockUpdates = false;
@@ -73,11 +92,16 @@ internal partial class MainWindow : Window {
         blockUpdates = true;
 
         foreach (var child in pnlMeasurements.Children) {
-            if (child is TextBox textBox) {
-                if (textBox.Tag is not string measurementName) { continue; }
-                var value = Calculator.GetGuiValue(calculator, measurementName);
-                if (textBox.Text != value) { textBox.Text = value; }
+            if (child is StackPanel group) {
+                foreach (var element in group.Children) {
+                    if (element is TextBox textBox) {
+                        if (textBox.Tag is not string measurementName) { continue; }
+                        var value = Calculator.GetGuiValue(calculator, measurementName);
+                        if (textBox.Text != value) { textBox.Text = value; }
+                    }
+                }
             }
+
         }
         blockUpdates = false;
     }
