@@ -1,6 +1,7 @@
 namespace ResiCalc;
 
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 
@@ -50,6 +51,14 @@ public class VoltageDivider : Calculator {
         }
     }
 
+    private Measurement _Ratio;
+    [Category("Input Properties")]
+    [DisplayName("Ratio")]
+    [MeasurementUnit(":1")]
+    public Measurement Ratio {
+        get { return _Ratio; }
+    }
+
 
     private Measurement _R1;
     [Category("~Resistor Values")]
@@ -59,8 +68,8 @@ public class VoltageDivider : Calculator {
         get { return _R1; }
         set {
             _R1 = value;
-            var ratio = (R1 + R2) / R2;
-            _VMax = VRef * ratio;
+            _Ratio = (R1 + R2) / R2;
+            _VMax = VRef * Ratio;
             UpdateOther();
             base.StoreWrite(nameof(R1));
         }
@@ -226,11 +235,13 @@ public class VoltageDivider : Calculator {
     private void UpdateRatio() {
         var ratio = VMax / VRef;
         if (ratio > 1) {
+            _Ratio = ratio;
             if (R2.IsNull) { _R2 = 10000; }
-            _R1 = R2 * (ratio - 1);
+            _R1 = R2 * (Ratio - 1);
             _VMax = VRef * (R1 + R2) / R2;
         } else {
-            _R1 = null;
+            _Ratio = 1;
+            _R1 = 0;
             _R2 = null;
             _VMax = VRef;
         }
@@ -248,11 +259,18 @@ public class VoltageDivider : Calculator {
     /// <inheritdoc/>
     public override ReadOnlyCollection<string> GetElementNames() {
         return new ReadOnlyCollection<string>([
-            nameof(VRef), nameof(VMax), nameof(R1), nameof(R2), nameof(AdcBits), nameof(AdcSteps), nameof(AdcLsb), nameof(Impedance),
+            nameof(VRef), nameof(VMax), nameof(Ratio), nameof(R1), nameof(R2), nameof(AdcBits), nameof(AdcSteps), nameof(AdcLsb), nameof(Impedance),
             nameof(CmdVRef1024), nameof(CmdVRef1200), nameof(CmdVRef1250), nameof(CmdVRef2048), nameof(CmdVRef2500), nameof(CmdVRef3300), nameof(CmdVRef4096), nameof(CmdVRef5000),
             nameof(CmdVMax05), nameof(CmdVMax09), nameof(CmdVMax12), nameof(CmdVMax15), nameof(CmdVMax24), nameof(CmdVMax30), nameof(CmdVMax36), nameof(CmdVMax48), nameof(CmdVMax60),
             nameof (CmdAdcBits08), nameof (CmdAdcBits10), nameof (CmdAdcBits12), nameof (CmdAdcBits14), nameof (CmdAdcBits16), nameof (CmdAdcBits18),
             nameof(CmdR21k), nameof(CmdR210k),
+        ]);
+    }
+
+    /// <inheritdoc/>
+    public override ReadOnlyCollection<KeyValuePair<string, string>> GetExampleImageResources() {
+        return new ReadOnlyCollection<KeyValuePair<string, string>>([
+            new KeyValuePair<string,string>("VoltageDivider.png", "Example circuit"),
         ]);
     }
 

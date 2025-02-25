@@ -43,6 +43,14 @@ public abstract class Calculator {
     /// </summary>
     public abstract ReadOnlyCollection<string> GetElementNames();
 
+    private readonly ReadOnlyCollection<KeyValuePair<string, string>> _EmptyExamples = new([]);
+    /// <summary>
+    /// Returns all example images.
+    /// </summary>
+    public virtual ReadOnlyCollection<KeyValuePair<string, string>> GetExampleImageResources() {
+        return _EmptyExamples;
+    }
+
     #endregion Elements
 
 

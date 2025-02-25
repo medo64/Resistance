@@ -26,10 +26,8 @@
             <DockPanel>
                 <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" Name="pnlGroupsPrimary" />
                 <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Name="pnlGroupsSecondary" />
-                <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Name="pnlOther" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="16" />
+                <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Name="pnlOther" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="16" />
             </DockPanel>
-        </Border>
-        <Border Grid.Column="3" Padding="4">
         </Border>
     </Grid>
 

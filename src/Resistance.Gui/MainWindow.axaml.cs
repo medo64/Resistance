@@ -1,12 +1,15 @@
 namespace ResiCalc;
 
 using System;
+using System.Collections.Generic;
 using System.Runtime.Intrinsics.X86;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 using Avalonia.Styling;
 using Medo.Configuration;
 
@@ -37,6 +40,7 @@ internal partial class MainWindow : Window {
     private void lsbCalculators_SelectionChanged(object? sender, SelectionChangedEventArgs e) {
         pnlGroupsPrimary.Children.Clear();
         pnlGroupsSecondary.Children.Clear();
+        pnlOther.Children.Clear();
         if (lsbCalculators.SelectedItem is not Calculator calculator) { return; }
 
         var blockUpdates = true;
@@ -137,6 +141,31 @@ internal partial class MainWindow : Window {
 
             }
 
+        }
+
+        foreach (var exampleImageResource in calculator.GetExampleImageResources()) {
+            var resourceName = exampleImageResource.Key;
+            var caption = exampleImageResource.Value;
+
+            var imageStack = new StackPanel();
+            pnlOther.Children.Add(imageStack);
+
+            var captionTextBlock = new TextBlock() {
+                FontSize = FontSize * 0.8f,
+                Foreground = BrushHelpers.SystemBaseMediumHighColor,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Margin = new(0, 0, 0, 4),
+                Text = caption,
+            };
+            imageStack.Children.Add(captionTextBlock);
+
+            var bitmapUri = new Uri("avares://resistance/Assets/Examples/" + resourceName);
+            var bitmap = new Bitmap(AssetLoader.Open(bitmapUri));
+            var imageControl = new Image() {
+                Source = bitmap,
+                Stretch = Stretch.None,
+            };
+            imageStack.Children.Add(imageControl);
         }
 
         blockUpdates = false;
