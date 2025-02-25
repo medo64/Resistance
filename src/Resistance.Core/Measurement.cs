@@ -111,6 +111,14 @@ public readonly struct Measurement : IEquatable<Measurement> {
         if (Value is null) { return ""; }
         provider ??= CultureInfo.CurrentCulture;
 
+        if (DigitCount is null) {  // don't mess with units here
+            if (string.IsNullOrEmpty(unit)) {
+                return Value.Value.ToString(provider);
+            } else {
+                return Value.Value.ToString(provider) + unit.Trim();
+            }
+        }
+
         var value = Value.Value;
         var number = value;
         return number switch {
@@ -139,7 +147,9 @@ public readonly struct Measurement : IEquatable<Measurement> {
     private string GetString(CultureInfo provider, decimal scaledValue, char si, string unit) {
         var sb = new StringBuilder();
 
-        if (DigitCount is null) {  // decimal digits
+        if (DigitCount is null) {
+            return "";  // handled elsewhere
+        } else if (DigitCount == 0) {  // default format
             sb.Append(scaledValue.ToString("0.###", provider));
         } else if (DigitCount >= 0) {  // decimal digits
             sb.Append(scaledValue.ToString("0." + new string('0', DigitCount.Value), provider));

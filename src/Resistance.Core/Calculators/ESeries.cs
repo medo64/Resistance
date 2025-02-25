@@ -224,7 +224,7 @@ public class ESeries : Calculator {
     #region Elements
 
     /// <inheritdoc/>
-    public override ReadOnlyCollection<string> GetMeasurementNames() {
+    public override ReadOnlyCollection<string> GetElementNames() {
         return new ReadOnlyCollection<string>([
             nameof(Value),
             nameof(E3d),

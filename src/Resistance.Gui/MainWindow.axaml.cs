@@ -44,8 +44,8 @@ internal partial class MainWindow : Window {
         string? lastCategory = null;
         StackPanel? pnlGroup = null;
 
-        foreach (var measurementName in calculator.GetMeasurementNames()) {
-            var category = Calculator.GetGuiCategory(calculator, measurementName);
+        foreach (var elementName in calculator.GetElementNames()) {
+            var category = Calculator.GetGuiCategory(calculator, elementName);
             if ((category != lastCategory) || (pnlGroup is null)) {
                 lastCategory = category;
                 var isContinuingCategory = category.StartsWith('~');
@@ -68,51 +68,75 @@ internal partial class MainWindow : Window {
                     FontSize = FontSize * 0.8f,
                     Foreground = BrushHelpers.SystemBaseMediumHighColor,
                     HorizontalAlignment = HorizontalAlignment.Center,
-                    Margin = new(0, isContinuingCategory ? 16 : 0, 0, 8),
+                    Margin = new(0, isContinuingCategory ? 16 : 0, 0, 4),
                     Text = !string.IsNullOrEmpty(category) ? "- " + category + " -" : "",
                 };
                 pnlGroup.Children.Add(categoryTextBlock);
             }
 
-            var displayName = Calculator.GetGuiDisplayName(calculator, measurementName) + ":";
-            var displayNameTextBlock = new TextBlock() {
-                Foreground = BrushHelpers.SystemBaseMediumHighColor,
-                HorizontalAlignment = HorizontalAlignment.Left,
-                Text = displayName,
-            };
-            pnlGroup.Children.Add(displayNameTextBlock);
+            var displayName = Calculator.GetGuiDisplayName(calculator, elementName);
 
-            var isReadonly = Calculator.GetGuiIsReadonly(calculator, measurementName);
-            var value = Calculator.GetGuiValue(calculator, measurementName);
-            var valueTextBox = new TextBox() {
-                FontSize = FontSize * 1.3f,
-                IsReadOnly = isReadonly,
-                Margin = new Thickness(0, 0, 0, 16),
-                Text = value,
-                TextAlignment = TextAlignment.Right,
-                Tag = new TagBag {
-                    MeasurementName = measurementName
+            if (Calculator.GetGuiIsText(calculator, elementName)) {
+
+                var displayNameTextBlock = new TextBlock() {
+                    Foreground = BrushHelpers.SystemBaseMediumHighColor,
+                    HorizontalAlignment = HorizontalAlignment.Left,
+                    Text = displayName + ":",
+                };
+                pnlGroup.Children.Add(displayNameTextBlock);
+
+                var isReadonly = Calculator.GetGuiIsReadonly(calculator, elementName);
+
+                var value = Calculator.GetGuiValue(calculator, elementName);
+                var valueTextBox = new TextBox() {
+                    FontSize = FontSize * 1.3f,
+                    IsReadOnly = isReadonly,
+                    Margin = new Thickness(0, 0, 0, 16),
+                    Text = value,
+                    TextAlignment = TextAlignment.Right,
+                    Tag = new TagBag {
+                        ElementName = elementName
+                    }
+                };
+                if (!isReadonly) {
+                    valueTextBox.GotFocus += (sender, e) => {
+                        var bag = (TagBag)((TextBox)sender!).Tag!;
+                        bag.AnyChange = false;
+                    };
+                    valueTextBox.TextChanged += (sender, e) => {
+                        var bag = (TagBag)((TextBox)sender!).Tag!;
+                        bag.AnyChange = true;
+                    };
+                    valueTextBox.LostFocus += (sender, e) => {
+                        if (blockUpdates) { return; }
+                        var bag = (TagBag)((TextBox)sender!).Tag!;
+                        if (bag.AnyChange) {
+                            Calculator.SetGuiValue(calculator, elementName, valueTextBox.Text);
+                            UpdateAll(ref blockUpdates, calculator);
+                        }
+                    };
                 }
-            };
-            if (!isReadonly) {
-                valueTextBox.GotFocus += (sender, e) => {
-                    var bag = (TagBag)((TextBox)sender!).Tag!;
-                    bag.AnyChange = false;
+                pnlGroup.Children.Add(valueTextBox);
+
+            } else if (Calculator.GetGuiIsCommand(calculator, elementName)) {
+
+                var commandButton = new Button() {
+                    Content = displayName,
+                    HorizontalAlignment = HorizontalAlignment.Stretch,
+                    HorizontalContentAlignment = HorizontalAlignment.Center,
+                    Margin = new Thickness(4),
                 };
-                valueTextBox.TextChanged += (sender, e) => {
-                    var bag = (TagBag)((TextBox)sender!).Tag!;
-                    bag.AnyChange = true;
-                };
-                valueTextBox.LostFocus += (sender, e) => {
-                    if (blockUpdates) { return; }
-                    var bag = (TagBag)((TextBox)sender!).Tag!;
-                    if (bag.AnyChange) {
-                        Calculator.SetGuiValue(calculator, measurementName, valueTextBox.Text);
+                commandButton.Click += (sender, e) => {
+                    var methodInfo = Calculator.GetGuiMethodInfo(calculator, elementName);
+                    if (methodInfo is not null) {
+                        methodInfo.Invoke(calculator, []);
                         UpdateAll(ref blockUpdates, calculator);
                     }
                 };
+                pnlGroup.Children.Add(commandButton);
+
             }
-            pnlGroup.Children.Add(valueTextBox);
+
         }
 
         blockUpdates = false;
@@ -131,8 +155,8 @@ internal partial class MainWindow : Window {
                 UpdateControls(calculator, subcontrols.Children);
             } else if (control is TextBox textBox) {
                 var bag = textBox.Tag as TagBag;
-                if ((bag is not null) && (bag.MeasurementName is not null)) {
-                    var value = Calculator.GetGuiValue(calculator, bag.MeasurementName);
+                if ((bag is not null) && (bag.ElementName is not null)) {
+                    var value = Calculator.GetGuiValue(calculator, bag.ElementName);
                     if (textBox.Text != value) { textBox.Text = value; }
                 }
             }

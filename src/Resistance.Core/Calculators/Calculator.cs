@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
+using System.Reflection;
 using System.Text;
 using Medo.Configuration;
 
@@ -40,7 +41,7 @@ public abstract class Calculator {
     /// <summary>
     /// Returns all measurements for the calculator.
     /// </summary>
-    public abstract ReadOnlyCollection<string> GetMeasurementNames();
+    public abstract ReadOnlyCollection<string> GetElementNames();
 
     #endregion Elements
 
@@ -96,15 +97,24 @@ public abstract class Calculator {
 
     #region Gui
 
-    public static string GetGuiCategory(Calculator calculator, string measurementName) {
+    public static string GetGuiCategory(Calculator calculator, string elementName) {
         ArgumentNullException.ThrowIfNull(calculator);
-        ArgumentNullException.ThrowIfNull(measurementName);
+        ArgumentNullException.ThrowIfNull(elementName);
 
         var calculatorType = calculator.GetType();
-        var measurementProperty = calculatorType.GetProperty(measurementName);
+        var propertyInfo = calculatorType.GetProperty(elementName);
+        var methodInfo = calculatorType.GetMethod(elementName);
 
-        if (measurementProperty is not null) {
-            foreach (var attr in measurementProperty.GetCustomAttributes(typeof(CategoryAttribute), false)) {
+        if (propertyInfo is not null) {
+            foreach (var attr in propertyInfo.GetCustomAttributes(typeof(CategoryAttribute), false)) {
+                if (attr is CategoryAttribute categoryAttr) {
+                    return categoryAttr.Category;
+                }
+            }
+        }
+
+        if (methodInfo is not null) {
+            foreach (var attr in methodInfo.GetCustomAttributes(typeof(CategoryAttribute), false)) {
                 if (attr is CategoryAttribute categoryAttr) {
                     return categoryAttr.Category;
                 }
@@ -114,30 +124,59 @@ public abstract class Calculator {
         return "";
     }
 
-    public static string GetGuiDisplayName(Calculator calculator, string measurementName) {
+    public static string GetGuiDisplayName(Calculator calculator, string elementName) {
         ArgumentNullException.ThrowIfNull(calculator);
-        ArgumentNullException.ThrowIfNull(measurementName);
+        ArgumentNullException.ThrowIfNull(elementName);
 
         var calculatorType = calculator.GetType();
-        var measurementProperty = calculatorType.GetProperty(measurementName);
+        var propertyInfo = calculatorType.GetProperty(elementName);
+        var methodInfo = calculatorType.GetMethod(elementName);
 
-        if (measurementProperty is not null) {
-            foreach (var attr in measurementProperty.GetCustomAttributes(typeof(DisplayNameAttribute), false)) {
+        if (propertyInfo is not null) {
+            foreach (var attr in propertyInfo.GetCustomAttributes(typeof(DisplayNameAttribute), false)) {
                 if (attr is DisplayNameAttribute displayNameAttr) {
                     return displayNameAttr.DisplayName;
                 }
             }
         }
 
-        return measurementName;
+        if (methodInfo is not null) {
+            foreach (var attr in methodInfo.GetCustomAttributes(typeof(DisplayNameAttribute), false)) {
+                if (attr is DisplayNameAttribute displayNameAttr) {
+                    return displayNameAttr.DisplayName;
+                }
+            }
+        }
+
+        return elementName;
     }
 
-    public static bool GetGuiIsReadonly(Calculator calculator, string measurementName) {
+    public static bool GetGuiIsText(Calculator calculator, string elementName) {
         ArgumentNullException.ThrowIfNull(calculator);
-        ArgumentNullException.ThrowIfNull(measurementName);
+        ArgumentNullException.ThrowIfNull(elementName);
 
         var calculatorType = calculator.GetType();
-        var measurementProperty = calculatorType.GetProperty(measurementName);
+        var measurementProperty = calculatorType.GetProperty(elementName);
+
+        return (measurementProperty is not null);
+    }
+
+    public static bool GetGuiIsCommand(Calculator calculator, string elementName) {
+        ArgumentNullException.ThrowIfNull(calculator);
+        ArgumentNullException.ThrowIfNull(elementName);
+
+        var calculatorType = calculator.GetType();
+        var commandMethod = calculatorType.GetMethod(elementName);
+
+        return (commandMethod is not null);
+    }
+
+    public static bool GetGuiIsReadonly(Calculator calculator, string elementName) {
+        ArgumentNullException.ThrowIfNull(calculator);
+        ArgumentNullException.ThrowIfNull(elementName);
+
+        var calculatorType = calculator.GetType();
+        var measurementProperty = calculatorType.GetProperty(elementName);
         if (measurementProperty is null) { return true; }
 
         return !measurementProperty.CanWrite;
@@ -239,6 +278,20 @@ public abstract class Calculator {
         }
 
         return "";
+    }
+
+    public static MethodInfo? GetGuiMethodInfo(Calculator calculator, string measurementName) {
+        ArgumentNullException.ThrowIfNull(calculator);
+        ArgumentNullException.ThrowIfNull(measurementName);
+
+        var calculatorType = calculator.GetType();
+        var methodInfo = calculatorType.GetMethod(measurementName);
+
+        if (methodInfo is not null) {
+            return methodInfo;
+        }
+
+        return null;
     }
 
     #endregion Gui

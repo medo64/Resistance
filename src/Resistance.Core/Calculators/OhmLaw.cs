@@ -95,7 +95,7 @@ public class OhmLaw : Calculator {
     #region Elements
 
     /// <inheritdoc/>
-    public override ReadOnlyCollection<string> GetMeasurementNames() {
+    public override ReadOnlyCollection<string> GetElementNames() {
         return new ReadOnlyCollection<string>([
             nameof(Voltage),
             nameof(Current),

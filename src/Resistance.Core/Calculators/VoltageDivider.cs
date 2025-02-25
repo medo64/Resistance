@@ -94,6 +94,14 @@ public class VoltageDivider : Calculator {
         }
     }
 
+    private Measurement _AdcSteps;
+    [Category("~ADC Properties")]
+    [DisplayName("ADC Steps")]
+    [MeasurementUnit("")]
+    public Measurement AdcSteps {
+        get { return _AdcSteps; }
+    }
+
     private Measurement _AdcLsb;
     [Category("~ADC Properties")]
     [DisplayName("ADC LSB Resolution")]
@@ -111,6 +119,110 @@ public class VoltageDivider : Calculator {
     }
 
 
+    [Category("Reference Voltage")]
+    [DisplayName("1.024 V")]
+    public void CmdVRef1024() { VRef = 1.024m; }
+
+    [Category("Reference Voltage")]
+    [DisplayName("1.2 V")]
+    public void CmdVRef1200() { VRef = 1.200m; }
+
+    [Category("Reference Voltage")]
+    [DisplayName("1.25 V")]
+    public void CmdVRef1250() { VRef = 1.250m; }
+
+    [Category("Reference Voltage")]
+    [DisplayName("2.048 V")]
+    public void CmdVRef2048() { VRef = 2.048m; }
+
+    [Category("Reference Voltage")]
+    [DisplayName("2.5 V")]
+    public void CmdVRef2500() { VRef = 2.500m; }
+
+    [Category("Reference Voltage")]
+    [DisplayName("3.3 V")]
+    public void CmdVRef3300() { VRef = 3.300m; }
+
+    [Category("Reference Voltage")]
+    [DisplayName("4.096 V")]
+    public void CmdVRef4096() { VRef = 4.096m; }
+
+    [Category("Reference Voltage")]
+    [DisplayName("5.0 V")]
+    public void CmdVRef5000() { VRef = 5.000m; }
+
+
+    [Category("Maximum Voltage")]
+    [DisplayName("5 V ±10%")]
+    public void CmdVMax05() { VMax = 5 * 1.1m; }
+
+    [Category("Maximum Voltage")]
+    [DisplayName("9 V ±10%")]
+    public void CmdVMax09() { VMax = 9 * 1.1m; }
+
+    [Category("Maximum Voltage")]
+    [DisplayName("12 V ±10%")]
+    public void CmdVMax12() { VMax = 12 * 1.1m; }
+
+    [Category("Maximum Voltage")]
+    [DisplayName("15 V ±10%")]
+    public void CmdVMax15() { VMax = 15 * 1.1m; }
+
+    [Category("Maximum Voltage")]
+    [DisplayName("24 V ±10%")]
+    public void CmdVMax24() { VMax = 24 * 1.1m; }
+
+    [Category("Maximum Voltage")]
+    [DisplayName("30 V ±10%")]
+    public void CmdVMax30() { VMax = 30 * 1.1m; }
+
+    [Category("Maximum Voltage")]
+    [DisplayName("36 V ±10%")]
+    public void CmdVMax36() { VMax = 36 * 1.1m; }
+
+    [Category("Maximum Voltage")]
+    [DisplayName("48 V ±10%")]
+    public void CmdVMax48() { VMax = 48 * 1.1m; }
+
+    [Category("Maximum Voltage")]
+    [DisplayName("60 V ±10%")]
+    public void CmdVMax60() { VMax = 60 * 1.1m; }
+
+
+    [Category("ADC Resolution")]
+    [DisplayName("8 bit")]
+    public void CmdAdcBits08() { AdcBits = 8; }
+
+    [Category("ADC Resolution")]
+    [DisplayName("10 bit")]
+    public void CmdAdcBits10() { AdcBits = 10; }
+
+    [Category("ADC Resolution")]
+    [DisplayName("12 bit")]
+    public void CmdAdcBits12() { AdcBits = 12; }
+
+    [Category("ADC Resolution")]
+    [DisplayName("14 bit")]
+    public void CmdAdcBits14() { AdcBits = 14; }
+
+    [Category("ADC Resolution")]
+    [DisplayName("16 bit")]
+    public void CmdAdcBits16() { AdcBits = 16; }
+
+    [Category("ADC Resolution")]
+    [DisplayName("18 bit")]
+    public void CmdAdcBits18() { AdcBits = 18; }
+
+
+    [Category("~R2")]
+    [DisplayName("1 kΩ")]
+    public void CmdR21k() { R2 = 1000; }
+
+    [Category("~R2")]
+    [DisplayName("10 kΩ")]
+    public void CmdR210k() { R2 = 10000; }
+
+
     private void UpdateRatio() {
         var ratio = VMax / VRef;
         if (ratio > 1) {
@@ -125,7 +237,8 @@ public class VoltageDivider : Calculator {
     }
 
     private void UpdateOther() {
-        _AdcLsb = new Measurement(VMax / (decimal)Math.Pow(2, (int)AdcBits), -4);
+        _AdcSteps = new Measurement((decimal)Math.Pow(2, (int)AdcBits), null);
+        _AdcLsb = new Measurement(VMax / AdcSteps, -4);
         _Impedance = (R1 * R2) / (R1 + R2);
     }
 
@@ -133,15 +246,13 @@ public class VoltageDivider : Calculator {
     #region Elements
 
     /// <inheritdoc/>
-    public override ReadOnlyCollection<string> GetMeasurementNames() {
+    public override ReadOnlyCollection<string> GetElementNames() {
         return new ReadOnlyCollection<string>([
-            nameof(VRef),
-            nameof(VMax),
-            nameof(R1),
-            nameof(R2),
-            nameof(AdcBits),
-            nameof(AdcLsb),
-            nameof(Impedance),
+            nameof(VRef), nameof(VMax), nameof(R1), nameof(R2), nameof(AdcBits), nameof(AdcSteps), nameof(AdcLsb), nameof(Impedance),
+            nameof(CmdVRef1024), nameof(CmdVRef1200), nameof(CmdVRef1250), nameof(CmdVRef2048), nameof(CmdVRef2500), nameof(CmdVRef3300), nameof(CmdVRef4096), nameof(CmdVRef5000),
+            nameof(CmdVMax05), nameof(CmdVMax09), nameof(CmdVMax12), nameof(CmdVMax15), nameof(CmdVMax24), nameof(CmdVMax30), nameof(CmdVMax36), nameof(CmdVMax48), nameof(CmdVMax60),
+            nameof (CmdAdcBits08), nameof (CmdAdcBits10), nameof (CmdAdcBits12), nameof (CmdAdcBits14), nameof (CmdAdcBits16), nameof (CmdAdcBits18),
+            nameof(CmdR21k), nameof(CmdR210k),
         ]);
     }
 
