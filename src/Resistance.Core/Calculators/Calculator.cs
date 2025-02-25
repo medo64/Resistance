@@ -249,6 +249,7 @@ public abstract class Calculator {
     private readonly static ReadOnlyCollection<Calculator> _AllCalculators = new([
         new ESeries(),
         new OhmLaw(),
+        new VoltageDivider(),
     ]);
 
     /// <summary>

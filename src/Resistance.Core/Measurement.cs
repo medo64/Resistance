@@ -14,18 +14,25 @@ public readonly struct Measurement : IEquatable<Measurement> {
     /// <summary>
     /// Creates a new instance.
     /// </summary>
-    public Measurement() {
-        Value = null;
-        DigitCount = -3;
+    public Measurement()
+        : this(null) {
     }
 
     /// <summary>
     /// Creates a new instance.
     /// </summary>
     /// <param name="value">Value.</param>
-    public Measurement(decimal? value) {
-        Value = value;
-        DigitCount = -3;
+    public Measurement(decimal? value)
+        : this(value, NumberSeries.None, NumberSeriesRounding.Nearest, -3) {
+    }
+
+    /// <summary>
+    /// Creates a new instance.
+    /// </summary>
+    /// <param name="value">Value.</param>
+    /// <param name="digitCount">Negative number uses rounding using significant digits, while positive number controls how many decimal places to use.</param>
+    internal Measurement(decimal? value, int? digitCount)
+        : this(value, NumberSeries.None, NumberSeriesRounding.Nearest, digitCount) {
     }
 
     /// <summary>
@@ -41,6 +48,8 @@ public readonly struct Measurement : IEquatable<Measurement> {
         } else {
             Value = RoundToSeries(value, series, rounding);
         }
+        Series = series;
+        Rounding = rounding;
         if (digitCount is null) {
             DigitCount = null;
         } else if (digitCount >= 0) {
@@ -51,7 +60,21 @@ public readonly struct Measurement : IEquatable<Measurement> {
     }
 
     private readonly decimal? Value;
-    private readonly int? DigitCount;
+
+    /// <summary>
+    /// Gets E-series rounding.
+    /// </summary>
+    internal NumberSeries Series { get; }
+
+    /// <summary>
+    /// Gets E-series rounding direction.
+    /// </summary>
+    internal NumberSeriesRounding Rounding { get; }
+
+    /// <summary>
+    /// Gets number of digits things are rounded to.
+    /// </summary>
+    internal int? DigitCount { get; }
 
 
     /// <summary>
@@ -119,7 +142,7 @@ public readonly struct Measurement : IEquatable<Measurement> {
         if (DigitCount is null) {  // decimal digits
             sb.Append(scaledValue.ToString("0.###", provider));
         } else if (DigitCount >= 0) {  // decimal digits
-            sb.AppendFormat(provider, "0." + new string('0', DigitCount.Value), scaledValue);
+            sb.Append(scaledValue.ToString("0." + new string('0', DigitCount.Value), provider));
         } else {  // significant digits
             var index = 0;
             while (scaledValue >= 10) {

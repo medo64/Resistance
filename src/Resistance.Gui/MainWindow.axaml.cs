@@ -90,13 +90,26 @@ internal partial class MainWindow : Window {
                 Margin = new Thickness(0, 0, 0, 16),
                 Text = value,
                 TextAlignment = TextAlignment.Right,
-                Tag = measurementName,
+                Tag = new TagBag {
+                    MeasurementName = measurementName
+                }
             };
             if (!isReadonly) {
+                valueTextBox.GotFocus += (sender, e) => {
+                    var bag = (TagBag)((TextBox)sender!).Tag!;
+                    bag.AnyChange = false;
+                };
+                valueTextBox.TextChanged += (sender, e) => {
+                    var bag = (TagBag)((TextBox)sender!).Tag!;
+                    bag.AnyChange = true;
+                };
                 valueTextBox.LostFocus += (sender, e) => {
                     if (blockUpdates) { return; }
-                    Calculator.SetGuiValue(calculator, measurementName, valueTextBox.Text);
-                    UpdateAll(ref blockUpdates, calculator);
+                    var bag = (TagBag)((TextBox)sender!).Tag!;
+                    if (bag.AnyChange) {
+                        Calculator.SetGuiValue(calculator, measurementName, valueTextBox.Text);
+                        UpdateAll(ref blockUpdates, calculator);
+                    }
                 };
             }
             pnlGroup.Children.Add(valueTextBox);
@@ -117,9 +130,11 @@ internal partial class MainWindow : Window {
             if (control is StackPanel subcontrols) {
                 UpdateControls(calculator, subcontrols.Children);
             } else if (control is TextBox textBox) {
-                if (textBox.Tag is not string measurementName) { continue; }
-                var value = Calculator.GetGuiValue(calculator, measurementName);
-                if (textBox.Text != value) { textBox.Text = value; }
+                var bag = textBox.Tag as TagBag;
+                if ((bag is not null) && (bag.MeasurementName is not null)) {
+                    var value = Calculator.GetGuiValue(calculator, bag.MeasurementName);
+                    if (textBox.Text != value) { textBox.Text = value; }
+                }
             }
 
         }
