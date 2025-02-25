@@ -35,7 +35,8 @@ internal partial class MainWindow : Window {
 
 
     private void lsbCalculators_SelectionChanged(object? sender, SelectionChangedEventArgs e) {
-        pnlGroups.Children.Clear();
+        pnlGroupsPrimary.Children.Clear();
+        pnlGroupsSecondary.Children.Clear();
         if (lsbCalculators.SelectedItem is not Calculator calculator) { return; }
 
         var blockUpdates = true;
@@ -48,6 +49,7 @@ internal partial class MainWindow : Window {
             if ((category != lastCategory) || (pnlGroup is null)) {
                 lastCategory = category;
                 var isContinuingCategory = category.StartsWith('~');
+                var isPrimaryPanel = (pnlGroup is null);
                 category = category.TrimStart('~');
 
                 if (!isContinuingCategory || (pnlGroup is null)) {
@@ -55,7 +57,11 @@ internal partial class MainWindow : Window {
                         Margin = new(8, 0, 8, 0),
                         Width = 160,
                     };
-                    pnlGroups.Children.Add(pnlGroup);
+                    if (isPrimaryPanel) {
+                        pnlGroupsPrimary.Children.Add(pnlGroup);
+                    } else {
+                        pnlGroupsSecondary.Children.Add(pnlGroup);
+                    }
                 }
 
                 var categoryTextBlock = new TextBlock() {
@@ -101,19 +107,21 @@ internal partial class MainWindow : Window {
 
     private void UpdateAll(ref bool blockUpdates, Calculator calculator) {
         blockUpdates = true;
+        UpdateControls(calculator, pnlGroupsPrimary.Children);
+        UpdateControls(calculator, pnlGroupsSecondary.Children);
+        blockUpdates = false;
+    }
 
-        foreach (var outerElement in pnlGroups.Children) {
-            if (outerElement is StackPanel group) {
-                foreach (var innerElement in group.Children) {
-                    if (innerElement is TextBox textBox) {
-                        if (textBox.Tag is not string measurementName) { continue; }
-                        var value = Calculator.GetGuiValue(calculator, measurementName);
-                        if (textBox.Text != value) { textBox.Text = value; }
-                    }
-                }
+    private void UpdateControls(Calculator calculator, Controls controls) {
+        foreach (var control in controls) {
+            if (control is StackPanel subcontrols) {
+                UpdateControls(calculator, subcontrols.Children);
+            } else if (control is TextBox textBox) {
+                if (textBox.Tag is not string measurementName) { continue; }
+                var value = Calculator.GetGuiValue(calculator, measurementName);
+                if (textBox.Text != value) { textBox.Text = value; }
             }
 
         }
-        blockUpdates = false;
     }
 }
