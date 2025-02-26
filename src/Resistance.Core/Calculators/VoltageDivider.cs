@@ -13,11 +13,15 @@ public class VoltageDivider : Calculator {
     public VoltageDivider()
         : base("Voltage Divider", "Calculate voltage divider resistors.") {
 
-        _VRef = new Measurement(StoreRead(nameof(VRef), 2.048m), 3);
-        _VMax = StoreRead(nameof(VMax), 5);
-        _R1 = StoreRead(nameof(R1), 30000);
-        _R2 = StoreRead(nameof(R2), 10000);
-        _AdcBits = new Measurement(StoreRead(nameof(AdcBits), 12), 0);
+        _VRef = new Measurement(StoreRead(nameof(VRef), 2.048m), digitCount: 3, useSI: true, minValue: 0, maxValue: null);
+        _VMax = new Measurement(StoreRead(nameof(VMax), 2.048m), digitCount: 3, useSI: true, minValue: 0, maxValue: null);
+        _Ratio = new Measurement(null, digitCount: 2, useSI: false);
+        _R1 = new Measurement(StoreRead(nameof(R1), 30000), digitCount: -3, useSI: true, minValue: 0, maxValue: null);
+        _R2 = new Measurement(StoreRead(nameof(R2), 10000), digitCount: -3, useSI: true, minValue: 0, maxValue: null);
+        _AdcBits = new Measurement(StoreRead(nameof(AdcBits), 12), digitCount: 0, useSI: false, minValue: 4, maxValue: 32);
+        _AdcSteps = new Measurement(null, digitCount: 0, useSI: false);
+        _AdcLsb = new Measurement(null, digitCount: 0, useSI: false);
+        _Impedance = new Measurement(null, digitCount: -3, useSI: true);
         UpdateRatio();
         UpdateOther();
     }
@@ -30,7 +34,7 @@ public class VoltageDivider : Calculator {
     public Measurement VRef {
         get { return _VRef; }
         set {
-            _VRef = new Measurement(value, _VRef.DigitCount);
+            _VRef = _VRef.Adjust(value);
             UpdateRatio();
             UpdateOther();
             base.StoreWrite(nameof(VRef));
@@ -44,7 +48,7 @@ public class VoltageDivider : Calculator {
     public Measurement VMax {
         get { return _VMax; }
         set {
-            _VMax = value;
+            _VMax = _VMax.Adjust(value);
             UpdateRatio();
             UpdateOther();
             base.StoreWrite(nameof(VMax));
@@ -67,9 +71,9 @@ public class VoltageDivider : Calculator {
     public Measurement R1 {
         get { return _R1; }
         set {
-            _R1 = value;
-            _Ratio = (R1 + R2) / R2;
-            _VMax = VRef * Ratio;
+            _R1 = _R1.Adjust(value);
+            _Ratio = _Ratio.Adjust((R1 + R2) / R2);
+            _VMax = _VMax.Adjust(VRef * Ratio);
             UpdateOther();
             base.StoreWrite(nameof(R1));
         }
@@ -82,7 +86,7 @@ public class VoltageDivider : Calculator {
     public Measurement R2 {
         get { return _R2; }
         set {
-            _R2 = value;
+            _R2 = _R2.Adjust(value);
             UpdateRatio();
             UpdateOther();
             base.StoreWrite(nameof(R2));
@@ -97,7 +101,7 @@ public class VoltageDivider : Calculator {
     public Measurement AdcBits {
         get { return _AdcBits; }
         set {
-            _AdcBits = new Measurement(Math.Min(Math.Max(value, 4), 32), _AdcBits.DigitCount);
+            _AdcBits = _AdcBits.Adjust(value);
             UpdateOther();
             base.StoreWrite(nameof(AdcBits));
         }
@@ -235,22 +239,22 @@ public class VoltageDivider : Calculator {
     private void UpdateRatio() {
         var ratio = VMax / VRef;
         if (ratio > 1) {
-            _Ratio = ratio;
-            if (R2.IsNull) { _R2 = 10000; }
-            _R1 = R2 * (Ratio - 1);
-            _VMax = VRef * (R1 + R2) / R2;
+            _Ratio = _Ratio.Adjust(ratio);
+            if (R2.IsNull) { _R2 = _R2.Adjust(10000); }
+            _R1 = _R1.Adjust(R2 * (Ratio - 1));
+            _VMax = _VMax.Adjust(VRef * (R1 + R2) / R2);
         } else {
-            _Ratio = 1;
-            _R1 = 0;
-            _R2 = null;
-            _VMax = VRef;
+            _Ratio = _Ratio.Adjust(1);
+            _R1 = _R1.Adjust(0);
+            _R2 = _R2.Adjust(null);
+            _VMax = _VMax.Adjust(VRef);
         }
     }
 
     private void UpdateOther() {
-        _AdcSteps = new Measurement((decimal)Math.Pow(2, (int)AdcBits), null);
-        _AdcLsb = new Measurement(VMax / AdcSteps, -4);
-        _Impedance = (R1 * R2) / (R1 + R2);
+        _AdcSteps = _AdcSteps.Adjust((decimal)Math.Pow(2, (int)AdcBits));
+        _AdcLsb = _AdcLsb.Adjust(VMax / AdcSteps);
+        _Impedance = _Impedance.Adjust((R1 * R2) / (R1 + R2));
     }
 
 

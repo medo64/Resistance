@@ -12,10 +12,10 @@ public class OhmLaw : Calculator {
     public OhmLaw()
         : base("Ohm's Law", "Calculate voltage, current, or resistance using Ohm's Law.") {
 
-        _Voltage = StoreRead(nameof(Voltage), 5);
-        _Current = StoreRead(nameof(Current), 1);
-        _Resistance = _Voltage / _Current;
-        _Power = _Voltage * _Current;
+        _Voltage = new Measurement(StoreRead(nameof(Voltage), 5), digitCount: -3, useSI: true, minValue: 0, maxValue: null);
+        _Current = new Measurement(StoreRead(nameof(Current), 1), digitCount: -3, useSI: true, minValue: 0, maxValue: null);
+        _Resistance = new Measurement(_Voltage / _Current, digitCount: -3, useSI: true, minValue: 0, maxValue: null);
+        _Power = new Measurement(_Voltage * _Current, digitCount: -3, useSI: true, minValue: 0, maxValue: null);
     }
 
 
@@ -26,13 +26,13 @@ public class OhmLaw : Calculator {
     public Measurement Voltage {
         get { return _Voltage; }
         set {
-            _Voltage = value;
+            _Voltage = _Voltage.Adjust(value);
             if (base.IsSecondMoreRecentlyChanged(nameof(Current), nameof(Resistance))) {
-                _Resistance = Voltage / Current;
+                _Resistance = _Resistance.Adjust(Voltage / Current);
             } else {
-                _Current = Voltage / Resistance;
+                _Current = _Current.Adjust(Voltage / Resistance);
             }
-            _Power = Voltage * Current;
+            _Power = _Power.Adjust(Voltage * Current);
             base.StoreWrite(nameof(Voltage));
         }
     }
@@ -44,13 +44,13 @@ public class OhmLaw : Calculator {
     public Measurement Current {
         get { return _Current; }
         set {
-            _Current = value;
+            _Current = _Current.Adjust(value);
             if (base.IsSecondMoreRecentlyChanged(nameof(Voltage), nameof(Resistance))) {
-                _Voltage = Current * Resistance;
+                _Voltage = _Voltage.Adjust(Current * Resistance);
             } else {
-                _Resistance = Voltage / Current;
+                _Resistance = _Resistance.Adjust(Voltage / Current);
             }
-            _Power = Voltage * Current;
+            _Power = _Power.Adjust(Voltage * Current);
             base.StoreWrite(nameof(Current));
         }
     }
@@ -62,13 +62,13 @@ public class OhmLaw : Calculator {
     public Measurement Resistance {
         get { return _Resistance; }
         set {
-            _Resistance = value;
+            _Resistance = _Resistance.Adjust(value);
             if (base.IsSecondMoreRecentlyChanged(nameof(Voltage), nameof(Current))) {
-                _Voltage = Current * Resistance;
+                _Voltage = _Voltage.Adjust(Current * Resistance);
             } else {
-                _Current = Voltage / Resistance;
+                _Current = _Current.Adjust(Voltage / Resistance);
             }
-            _Power = Voltage * Current;
+            _Power = _Power.Adjust(Voltage * Current);
             base.StoreWrite(nameof(Resistance));
         }
     }
@@ -80,13 +80,13 @@ public class OhmLaw : Calculator {
     public Measurement Power {
         get { return _Power; }
         set {
-            _Power = value;
+            _Power = _Power.Adjust(value);
             if (base.IsSecondMoreRecentlyChanged(nameof(Voltage), nameof(Current))) {
-                _Voltage = Power / Current;
+                _Voltage = _Voltage.Adjust(Power / Current);
             } else {
-                _Current = Power / Voltage;
+                _Current = _Current.Adjust(Power / Voltage);
             }
-            _Resistance = Voltage / Current;
+            _Resistance = _Resistance.Adjust(Voltage / Current);
             base.StoreWrite(nameof(Power));
         }
     }
@@ -97,10 +97,7 @@ public class OhmLaw : Calculator {
     /// <inheritdoc/>
     public override ReadOnlyCollection<string> GetElementNames() {
         return new ReadOnlyCollection<string>([
-            nameof(Voltage),
-            nameof(Current),
-            nameof(Resistance),
-            nameof(Power),
+            nameof(Voltage), nameof(Current), nameof(Resistance), nameof(Power),
         ]);
     }
 

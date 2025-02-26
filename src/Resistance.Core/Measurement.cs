@@ -1,6 +1,7 @@
 namespace ResiCalc;
 
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -14,16 +15,9 @@ public readonly struct Measurement : IEquatable<Measurement> {
     /// <summary>
     /// Creates a new instance.
     /// </summary>
-    public Measurement()
-        : this(null) {
-    }
-
-    /// <summary>
-    /// Creates a new instance.
-    /// </summary>
     /// <param name="value">Value.</param>
-    public Measurement(decimal? value)
-        : this(value, NumberSeries.None, NumberSeriesRounding.Nearest, -3) {
+    internal Measurement(decimal? value)
+        : this(value, digitCount: -3, useSI: false) {
     }
 
     /// <summary>
@@ -31,33 +25,79 @@ public readonly struct Measurement : IEquatable<Measurement> {
     /// </summary>
     /// <param name="value">Value.</param>
     /// <param name="digitCount">Negative number uses rounding using significant digits, while positive number controls how many decimal places to use.</param>
-    internal Measurement(decimal? value, int? digitCount)
-        : this(value, NumberSeries.None, NumberSeriesRounding.Nearest, digitCount) {
+    /// <param name="useSI">Output in SI units.</param>
+    internal Measurement(decimal? value, int digitCount, bool useSI)
+        : this(value, digitCount, useSI, NumberSeries.None, NumberSeriesRounding.Nearest, minValue: null, maxValue: null) {
     }
 
     /// <summary>
     /// Creates a new instance.
     /// </summary>
     /// <param name="value">Value.</param>
+    /// <param name="digitCount">Negative number uses rounding using significant digits, while positive number controls how many decimal places to use.</param>
+    /// <param name="useSI">Output in SI units.</param>
+    /// <param name="minValue">Minimum value.</param>
+    /// <param name="maxValue">Maximum value.</param>
+    internal Measurement(decimal? value, int digitCount, bool useSI, decimal? minValue, decimal? maxValue)
+        : this(value, digitCount, useSI, NumberSeries.None, NumberSeriesRounding.Nearest, minValue, maxValue) {
+    }
+
+    /// <summary>
+    /// Creates a new instance.
+    /// </summary>
+    /// <param name="value">Value.</param>
+    /// <param name="digitCount">Negative number uses rounding using significant digits, while positive number controls how many decimal places to use.</param>
     /// <param name="series">Series.</param>
     /// <param name="rounding">Rounding.</param>
+    internal Measurement(decimal? value, int digitCount, NumberSeries series, NumberSeriesRounding rounding)
+        : this(value, digitCount, useSI: true, series, rounding, minValue: null, maxValue: null) {
+    }
+
+    /// <summary>
+    /// Creates a new instance.
+    /// </summary>
+    /// <param name="value">Value.</param>
     /// <param name="digitCount">Negative number uses rounding using significant digits, while positive number controls how many decimal places to use.</param>
-    internal Measurement(decimal? value, NumberSeries series, NumberSeriesRounding rounding, int? digitCount) {
+    /// <param name="series">Series.</param>
+    /// <param name="rounding">Rounding.</param>
+    /// <param name="minValue">Minimum value.</param>
+    /// <param name="maxValue">Maximum value.</param>
+    internal Measurement(decimal? value, int digitCount, NumberSeries series, NumberSeriesRounding rounding, decimal? minValue, decimal? maxValue)
+        : this(value, digitCount, useSI: true, series, rounding, minValue, maxValue) {
+    }
+
+    /// <summary>
+    /// Creates a new instance.
+    /// </summary>
+    /// <param name="value">Value.</param>
+    /// <param name="digitCount">Negative number uses rounding using significant digits, while positive number controls how many decimal places to use.</param>
+    /// <param name="useSI">Output in SI units.</param>
+    /// <param name="series">Series.</param>
+    /// <param name="rounding">Rounding.</param>
+    /// <param name="minValue">Minimum value.</param>
+    /// <param name="maxValue">Maximum value.</param>
+    private Measurement(decimal? value, int digitCount, bool useSI, NumberSeries series, NumberSeriesRounding rounding, decimal? minValue, decimal? maxValue) {
+        if (value is not null) {
+            if ((minValue is not null) && (value < minValue)) { value = minValue; }
+            if ((maxValue is not null) && (value > maxValue)) { value = maxValue; }
+        }
         if (series == NumberSeries.None) {
             Value = value;
         } else {
             Value = RoundToSeries(value, series, rounding);
         }
+        if (digitCount >= 0) {
+            DigitCount = Math.Min(Math.Max(digitCount, 0), 6);  // 0 - 6 decimal digits
+        } else {
+            DigitCount = Math.Min(Math.Max(digitCount, -6), -1);  // 1 to 6 significant digits
+        }
+        UseSI = useSI;
         Series = series;
         Rounding = rounding;
-        if (digitCount is null) {
-            DigitCount = null;
-        } else if (digitCount >= 0) {
-            DigitCount = Math.Min(Math.Max(digitCount.Value, 0), 6);  // 0 - 6 decimal digits
-        } else {
-            DigitCount = Math.Min(Math.Max(digitCount.Value, -6), 0);  // 1 to 6 significant digits
-        }
+        MinValue = minValue;
+        MaxValue = maxValue;
     }
+
 
     private readonly decimal? Value;
 
@@ -74,7 +114,31 @@ public readonly struct Measurement : IEquatable<Measurement> {
     /// <summary>
     /// Gets number of digits things are rounded to.
     /// </summary>
-    internal int? DigitCount { get; }
+    internal int DigitCount { get; }
+
+    /// <summary>
+    /// Gets if SI units are used for output.
+    /// </summary>
+    internal bool UseSI { get; }
+
+    /// <summary>
+    /// Gets minimum value.
+    /// </summary>
+    internal decimal? MinValue { get; }
+
+    /// <summary>
+    /// Gets maximum value.
+    /// </summary>
+    internal decimal? MaxValue { get; }
+
+
+    /// <summary>
+    /// Adjusts the value.
+    /// </summary>
+    /// <param name="newValue">New value.</param>
+    public Measurement Adjust(decimal? newValue) {
+        return new(newValue, DigitCount, UseSI, Series, Rounding, MinValue, MaxValue);
+    }
 
 
     /// <summary>
@@ -111,55 +175,46 @@ public readonly struct Measurement : IEquatable<Measurement> {
         if (Value is null) { return ""; }
         provider ??= CultureInfo.CurrentCulture;
 
-        if (DigitCount is null) {  // don't mess with units here
-            if (string.IsNullOrEmpty(unit)) {
-                return Value.Value.ToString(provider);
-            } else {
-                return Value.Value.ToString(provider) + unit.Trim();
-            }
+        var number = Value.Value;
+        if (UseSI) {
+            return number switch {
+                >= 1_000_000_000_000_000_000_000_000_000m => GetString(provider, number / 1_000_000_000_000_000_000_000_000_000m, 'R', unit),
+                >= 1_000_000_000_000_000_000_000_000m => GetString(provider, number / 1_000_000_000_000_000_000_000_000m, 'Y', unit),
+                >= 1_000_000_000_000_000_000_000m => GetString(provider, number / 1_000_000_000_000_000_000_000m, 'Z', unit),
+                >= 1_000_000_000_000_000_000m => GetString(provider, number / 1_000_000_000_000_000_000m, 'E', unit),
+                >= 1_000_000_000_000_000m => GetString(provider, number / 1_000_000_000_000_000m, 'P', unit),
+                >= 1_000_000_000_000m => GetString(provider, number / 1_000_000_000_000m, 'T', unit),
+                >= 1_000_000_000m => GetString(provider, number / 1_000_000_000m, 'G', unit),
+                >= 1_000_000m => GetString(provider, number / 1_000_000m, 'M', unit),
+                >= 1000m => GetString(provider, number / 1_000m, 'k', unit),
+                >= 1m => GetString(provider, number, ' ', unit),
+                >= 0.001m => GetString(provider, number * 1_000m, 'm', unit),
+                >= 0.000_001m => GetString(provider, number * 1_000_000m, 'μ', unit),
+                >= 0.000_000_001m => GetString(provider, number * 1_000_000_000m, 'n', unit),
+                >= 0.000_000_000_001m => GetString(provider, number * 1_000_000_000_000m, 'p', unit),
+                >= 0.000_000_000_000_001m => GetString(provider, number * 1_000_000_000_000_000m, 'f', unit),
+                >= 0.000_000_000_000_000_001m => GetString(provider, number * 1_000_000_000_000_000_000m, 'a', unit),
+                >= 0.000_000_000_000_000_000_001m => GetString(provider, number * 1_000_000_000_000_000_000_000m, 'z', unit),
+                >= 0.000_000_000_000_000_000_000_001m => GetString(provider, number * 1_000_000_000_000_000_000_000_000m, 'y', unit),
+                _ => GetString(provider, number * 1_000_000_000_000_000_000_000_000_000m, 'r', unit),
+            };
+        } else {
+            return GetString(provider, number, ' ', unit);
         }
-
-        var value = Value.Value;
-        var number = value;
-        return number switch {
-            >= 1_000_000_000_000_000_000_000_000_000m => GetString(provider, number / 1_000_000_000_000_000_000_000_000_000m, 'R', unit),
-            >= 1_000_000_000_000_000_000_000_000m => GetString(provider, number / 1_000_000_000_000_000_000_000_000m, 'Y', unit),
-            >= 1_000_000_000_000_000_000_000m => GetString(provider, number / 1_000_000_000_000_000_000_000m, 'Z', unit),
-            >= 1_000_000_000_000_000_000m => GetString(provider, number / 1_000_000_000_000_000_000m, 'E', unit),
-            >= 1_000_000_000_000_000m => GetString(provider, number / 1_000_000_000_000_000m, 'P', unit),
-            >= 1_000_000_000_000m => GetString(provider, number / 1_000_000_000_000m, 'T', unit),
-            >= 1_000_000_000m => GetString(provider, number / 1_000_000_000m, 'G', unit),
-            >= 1_000_000m => GetString(provider, number / 1_000_000m, 'M', unit),
-            >= 1000m => GetString(provider, number / 1_000m, 'k', unit),
-            >= 1m => GetString(provider, number, ' ', unit),
-            >= 0.001m => GetString(provider, number * 1_000m, 'm', unit),
-            >= 0.000_001m => GetString(provider, number * 1_000_000m, 'μ', unit),
-            >= 0.000_000_001m => GetString(provider, number * 1_000_000_000m, 'n', unit),
-            >= 0.000_000_000_001m => GetString(provider, number * 1_000_000_000_000m, 'p', unit),
-            >= 0.000_000_000_000_001m => GetString(provider, number * 1_000_000_000_000_000m, 'f', unit),
-            >= 0.000_000_000_000_000_001m => GetString(provider, number * 1_000_000_000_000_000_000m, 'a', unit),
-            >= 0.000_000_000_000_000_000_001m => GetString(provider, number * 1_000_000_000_000_000_000_000m, 'z', unit),
-            >= 0.000_000_000_000_000_000_000_001m => GetString(provider, number * 1_000_000_000_000_000_000_000_000m, 'y', unit),
-            _ => GetString(provider, number * 1_000_000_000_000_000_000_000_000_000m, 'r', unit),
-        };
     }
 
     private string GetString(CultureInfo provider, decimal scaledValue, char si, string unit) {
         var sb = new StringBuilder();
 
-        if (DigitCount is null) {
-            return "";  // handled elsewhere
-        } else if (DigitCount == 0) {  // default format
-            sb.Append(scaledValue.ToString("0.###", provider));
-        } else if (DigitCount >= 0) {  // decimal digits
-            sb.Append(scaledValue.ToString("0." + new string('0', DigitCount.Value), provider));
+        if (DigitCount >= 0) {  // decimal digits
+            sb.Append(scaledValue.ToString("0." + new string('#', DigitCount), provider));
         } else {  // significant digits
             var index = 0;
             while (scaledValue >= 10) {
                 index -= 1;
                 scaledValue /= 10m;
             }
-            var lastIndex = Math.Max(index + (-DigitCount.Value) - 1, 0);
+            var lastIndex = Math.Max(index + (-DigitCount) - 1, 0);
             for (var i = index; i <= lastIndex; i++) {
                 var digit = (i != lastIndex)
                           ? Math.Floor((decimal)scaledValue)
@@ -242,7 +297,7 @@ public readonly struct Measurement : IEquatable<Measurement> {
     /// <summary>
     /// Gets null value.
     /// </summary>
-    public static Measurement Null { get; } = new();
+    public static Measurement Null { get; } = new(null);
 
     /// <summary>
     /// Gets 10^-27 value.

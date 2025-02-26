@@ -12,7 +12,8 @@ public class ESeries : Calculator {
     public ESeries()
         : base("E-series", "Round to nearest E-series value") {
 
-        Value = StoreRead(nameof(Value), 1000);
+        _Value = new Measurement(StoreRead(nameof(Value), 1000), -3, useSI: true, minValue: 0, maxValue: null);
+        Value = _Value;  // force update
     }
 
 
@@ -23,28 +24,28 @@ public class ESeries : Calculator {
     public Measurement Value {
         get { return _Value; }
         set {
-            _Value = value;
-            _E3d = new Measurement(Value, NumberSeries.E3, NumberSeriesRounding.Down, -2);
-            _E6d = new Measurement(Value, NumberSeries.E6, NumberSeriesRounding.Down, -2);
-            _E12d = new Measurement(Value, NumberSeries.E12, NumberSeriesRounding.Down, -2);
-            _E24d = new Measurement(Value, NumberSeries.E24, NumberSeriesRounding.Down, -2);
-            _E48d = new Measurement(Value, NumberSeries.E48, NumberSeriesRounding.Down, -3);
-            _E96d = new Measurement(Value, NumberSeries.E96, NumberSeriesRounding.Down, -3);
-            _E192d = new Measurement(Value, NumberSeries.E192, NumberSeriesRounding.Down, -3);
-            _E3n = new Measurement(Value, NumberSeries.E3, NumberSeriesRounding.Nearest, -2);
-            _E6n = new Measurement(Value, NumberSeries.E6, NumberSeriesRounding.Nearest, -2);
-            _E12n = new Measurement(Value, NumberSeries.E12, NumberSeriesRounding.Nearest, -2);
-            _E24n = new Measurement(Value, NumberSeries.E24, NumberSeriesRounding.Nearest, -2);
-            _E48n = new Measurement(Value, NumberSeries.E48, NumberSeriesRounding.Nearest, -3);
-            _E96n = new Measurement(Value, NumberSeries.E96, NumberSeriesRounding.Nearest, -3);
-            _E192n = new Measurement(Value, NumberSeries.E192, NumberSeriesRounding.Nearest, -3);
-            _E3u = new Measurement(Value, NumberSeries.E3, NumberSeriesRounding.Up, -2);
-            _E6u = new Measurement(Value, NumberSeries.E6, NumberSeriesRounding.Up, -2);
-            _E12u = new Measurement(Value, NumberSeries.E12, NumberSeriesRounding.Up, -2);
-            _E24u = new Measurement(Value, NumberSeries.E24, NumberSeriesRounding.Up, -2);
-            _E48u = new Measurement(Value, NumberSeries.E48, NumberSeriesRounding.Up, -3);
-            _E96u = new Measurement(Value, NumberSeries.E96, NumberSeriesRounding.Up, -3);
-            _E192u = new Measurement(Value, NumberSeries.E192, NumberSeriesRounding.Up, -3);
+            _Value = _Value.Adjust(value);
+            _E3d = new Measurement(Value, -2, NumberSeries.E3, NumberSeriesRounding.Down);
+            _E6d = new Measurement(Value, -2, NumberSeries.E6, NumberSeriesRounding.Down);
+            _E12d = new Measurement(Value, -2, NumberSeries.E12, NumberSeriesRounding.Down);
+            _E24d = new Measurement(Value, -2, NumberSeries.E24, NumberSeriesRounding.Down);
+            _E48d = new Measurement(Value, -3, NumberSeries.E48, NumberSeriesRounding.Down);
+            _E96d = new Measurement(Value, -3, NumberSeries.E96, NumberSeriesRounding.Down);
+            _E192d = new Measurement(Value, -3, NumberSeries.E192, NumberSeriesRounding.Down);
+            _E3n = new Measurement(Value, -2, NumberSeries.E3, NumberSeriesRounding.Nearest);
+            _E6n = new Measurement(Value, -2, NumberSeries.E6, NumberSeriesRounding.Nearest);
+            _E12n = new Measurement(Value, -2, NumberSeries.E12, NumberSeriesRounding.Nearest);
+            _E24n = new Measurement(Value, -2, NumberSeries.E24, NumberSeriesRounding.Nearest);
+            _E48n = new Measurement(Value, -3, NumberSeries.E48, NumberSeriesRounding.Nearest);
+            _E96n = new Measurement(Value, -3, NumberSeries.E96, NumberSeriesRounding.Nearest);
+            _E192n = new Measurement(Value, -3, NumberSeries.E192, NumberSeriesRounding.Nearest);
+            _E3u = new Measurement(Value, -2, NumberSeries.E3, NumberSeriesRounding.Up);
+            _E6u = new Measurement(Value, -2, NumberSeries.E6, NumberSeriesRounding.Up);
+            _E12u = new Measurement(Value, -2, NumberSeries.E12, NumberSeriesRounding.Up);
+            _E24u = new Measurement(Value, -2, NumberSeries.E24, NumberSeriesRounding.Up);
+            _E48u = new Measurement(Value, -3, NumberSeries.E48, NumberSeriesRounding.Up);
+            _E96u = new Measurement(Value, -3, NumberSeries.E96, NumberSeriesRounding.Up);
+            _E192u = new Measurement(Value, -3, NumberSeries.E192, NumberSeriesRounding.Up);
             base.StoreWrite(nameof(Value));
         }
     }
@@ -227,27 +228,9 @@ public class ESeries : Calculator {
     public override ReadOnlyCollection<string> GetElementNames() {
         return new ReadOnlyCollection<string>([
             nameof(Value),
-            nameof(E3d),
-            nameof(E6d),
-            nameof(E12d),
-            nameof(E24d),
-            nameof(E48d),
-            nameof(E96d),
-            nameof(E192d),
-            nameof(E3n),
-            nameof(E6n),
-            nameof(E12n),
-            nameof(E24n),
-            nameof(E48n),
-            nameof(E96n),
-            nameof(E192n),
-            nameof(E3u),
-            nameof(E6u),
-            nameof(E12u),
-            nameof(E24u),
-            nameof(E48u),
-            nameof(E96u),
-            nameof(E192u),
+            nameof(E3d), nameof(E6d), nameof(E12d), nameof(E24d), nameof(E48d), nameof(E96d), nameof(E192d),
+            nameof(E3n), nameof(E6n), nameof(E12n), nameof(E24n), nameof(E48n), nameof(E96n), nameof(E192n),
+            nameof(E3u), nameof(E6u), nameof(E12u), nameof(E24u), nameof(E48u), nameof(E96u), nameof(E192u),
         ]);
     }
 

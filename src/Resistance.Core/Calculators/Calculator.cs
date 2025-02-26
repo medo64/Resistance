@@ -260,11 +260,11 @@ public abstract class Calculator {
                 _ => 1,
             };
 
-            var newValue = new Measurement(value * multiplier);
-            var oldValue = (Measurement)measurementProperty.GetValue(calculator)!;
+            var newValue = value * multiplier;
+            var oldValue = (decimal)(Measurement)measurementProperty.GetValue(calculator)!;
             if (newValue != oldValue) {
                 try {
-                    measurementProperty.SetValue(calculator, newValue);
+                    measurementProperty.SetValue(calculator, (Measurement)newValue);
                 } catch (Exception) { }  // TODO: readonly
             }
         }
