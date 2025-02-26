@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Resistance
+Comment=Electronics calculator
+TryExec=/opt/resistance/resistance
+Exec=env QT_QPA_PLATFORM=xcb /opt/resistance/resistance
+Icon=resistance
+Type=Application
+Categories=Utility;Electronics
