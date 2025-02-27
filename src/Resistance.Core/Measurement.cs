@@ -244,6 +244,10 @@ public readonly struct Measurement : IEquatable<Measurement> {
 
     public static implicit operator Measurement(decimal value) => new(value);
 
+    public static implicit operator Measurement(double value) => new((decimal)value);
+
+    public static implicit operator Measurement(int value) => new(value);
+
     public static implicit operator decimal?(Measurement value) => value.Value;
 
     public static implicit operator decimal(Measurement value) => value.Value ?? 0;

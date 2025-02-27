@@ -198,9 +198,15 @@ public abstract class Calculator {
         var measurementProperty = calculatorType.GetProperty(measurementName);
         if (measurementProperty is null) { return ""; }
 
-        var value = (Measurement)measurementProperty.GetValue(calculator)!;
-        var unit = GetGuiUnit(calculator, measurementName);
-        return value.ToString(CultureInfo.CurrentCulture, unit);
+        var valueObject = measurementProperty.GetValue(calculator);
+        if (valueObject is Measurement value) {
+            var unit = GetGuiUnit(calculator, measurementName);
+            return value.ToString(CultureInfo.CurrentCulture, unit);
+        } else if (valueObject is string text) {
+            return text;
+        } else {
+            return "";
+        }
     }
 
     public static void SetGuiValue(Calculator calculator, string measurementName, string text) {
@@ -302,6 +308,24 @@ public abstract class Calculator {
         return null;
     }
 
+    public static (byte red, byte green, byte blue)? GetGuiBackgroundColor(Calculator calculator, string measurementName) {
+        ArgumentNullException.ThrowIfNull(calculator);
+        ArgumentNullException.ThrowIfNull(measurementName);
+
+        var calculatorType = calculator.GetType();
+        var methodInfo = calculatorType.GetMethod(measurementName);
+
+        if (methodInfo is not null) {
+            foreach (var attr in methodInfo.GetCustomAttributes(typeof(BackgroundColorAttribute), false)) {
+                if (attr is BackgroundColorAttribute colorAttr) {
+                    return (colorAttr.Red, colorAttr.Green, colorAttr.Blue);
+                }
+            }
+        }
+
+        return null;
+    }
+
     #endregion Gui
 
 
@@ -310,6 +334,7 @@ public abstract class Calculator {
     private readonly static ReadOnlyCollection<Calculator> _AllCalculators = new([
         new ESeries(),
         new LdoPower(),
+        new Led(),
         new OhmLaw(),
         new VoltageDivider(),
     ]);

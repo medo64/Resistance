@@ -130,6 +130,14 @@ internal partial class MainWindow : Window {
                     HorizontalContentAlignment = HorizontalAlignment.Center,
                     Margin = new Thickness(4),
                 };
+
+                var color = Calculator.GetGuiBackgroundColor(calculator, elementName);
+                if (color is not null) {
+                    commandButton.Background = new SolidColorBrush(
+                        Color.FromArgb(255, color.Value.red, color.Value.green, color.Value.blue)
+                    );
+                }
+
                 commandButton.Click += (sender, e) => {
                     var methodInfo = Calculator.GetGuiMethodInfo(calculator, elementName);
                     if (methodInfo is not null) {
