@@ -22,6 +22,7 @@ public class Led : Calculator {
         _ResistorVoltageDrop = new Measurement(null, digitCount: -3, useSI: true);
         _ResistorCurrentFlow = new Measurement(null, digitCount: -3, useSI: true);
         _ResistorPowerDissipation = new Measurement(null, digitCount: -3, useSI: true);
+        _ResistorPowerRating = "";
 
         UpdateResistance();
     }
@@ -34,7 +35,7 @@ public class Led : Calculator {
     public Measurement SourceVoltage {
         get { return _SourceVoltage; }
         set {
-            _SourceVoltage = _SourceVoltage.Adjust(value);
+            _SourceVoltage.Adjust(value);
             UpdateResistance();
             base.StoreWrite(nameof(SourceVoltage));
         }
@@ -48,7 +49,7 @@ public class Led : Calculator {
     public Measurement ForwardVoltage {
         get { return _ForwardVoltage; }
         set {
-            _ForwardVoltage = _ForwardVoltage.Adjust(value);
+            _ForwardVoltage.Adjust(value);
             UpdateResistance();
             base.StoreWrite(nameof(ForwardVoltage));
         }
@@ -61,7 +62,7 @@ public class Led : Calculator {
     public Measurement ForwardCurrent {
         get { return _ForwardCurrent; }
         set {
-            _ForwardCurrent = _ForwardCurrent.Adjust(value);
+            _ForwardCurrent.Adjust(value);
             UpdateResistance();
             base.StoreWrite(nameof(ForwardCurrent));
         }
@@ -301,10 +302,10 @@ public class Led : Calculator {
 
 
     private void UpdateResistance() {
-        _ResistorVoltageDrop = _ResistorVoltageDrop.Adjust(SourceVoltage - ForwardVoltage);
-        _ResistorValue = _ResistorValue.Adjust(ResistorVoltageDrop / ForwardCurrent);
-        _ResistorCurrentFlow = _ResistorCurrentFlow.Adjust(ResistorVoltageDrop / ResistorValue);
-        _ResistorPowerDissipation = _ResistorPowerDissipation.Adjust(ResistorVoltageDrop * ResistorCurrentFlow);
+        _ResistorVoltageDrop.Adjust(SourceVoltage - ForwardVoltage);
+        _ResistorValue.Adjust(ResistorVoltageDrop / ForwardCurrent);
+        _ResistorCurrentFlow.Adjust(ResistorVoltageDrop / ResistorValue);
+        _ResistorPowerDissipation.Adjust(ResistorVoltageDrop * ResistorCurrentFlow);
         if (ResistorPowerDissipation.IsNull) {
             _ResistorPowerRating = "";
         } else {

@@ -32,7 +32,7 @@ public class LdoPower : Calculator {
     public Measurement InputVoltage {
         get { return _InputVoltage; }
         set {
-            _InputVoltage = _InputVoltage.Adjust(value);
+            _InputVoltage.Adjust(value);
             UpdateValues();
             base.StoreWrite(nameof(InputVoltage));
         }
@@ -45,7 +45,7 @@ public class LdoPower : Calculator {
     public Measurement InputTolerance {
         get { return _InputTolerance; }
         set {
-            _InputTolerance = _InputTolerance.Adjust(value);
+            _InputTolerance.Adjust(value);
             UpdateValues();
             base.StoreWrite(nameof(InputTolerance));
         }
@@ -59,7 +59,7 @@ public class LdoPower : Calculator {
     public Measurement OutputVoltage {
         get { return _OutputVoltage; }
         set {
-            _OutputVoltage = _OutputVoltage.Adjust(value);
+            _OutputVoltage.Adjust(value);
             UpdateValues();
             base.StoreWrite(nameof(OutputVoltage));
         }
@@ -72,7 +72,7 @@ public class LdoPower : Calculator {
     public Measurement OutputTolerance {
         get { return _OutputTolerance; }
         set {
-            _OutputTolerance = _OutputTolerance.Adjust(value);
+            _OutputTolerance.Adjust(value);
             UpdateValues();
             base.StoreWrite(nameof(OutputTolerance));
         }
@@ -85,7 +85,7 @@ public class LdoPower : Calculator {
     public Measurement OutputCurrent {
         get { return _OutputCurrent; }
         set {
-            _OutputCurrent = _OutputCurrent.Adjust(value);
+            _OutputCurrent.Adjust(value);
             UpdateValues();
             base.StoreWrite(nameof(OutputCurrent));
         }
@@ -99,7 +99,7 @@ public class LdoPower : Calculator {
     public Measurement PowerDissipation {
         get { return _PowerDissipation; }
         set {
-            _PowerDissipation = _PowerDissipation.Adjust(value);
+            _PowerDissipation.Adjust(value);
             UpdateValues();
             base.StoreWrite(nameof(PowerDissipation));
         }
@@ -112,7 +112,7 @@ public class LdoPower : Calculator {
     public Measurement ThermalResistance {
         get { return _ThermalResistance; }
         set {
-            _ThermalResistance = _ThermalResistance.Adjust(value);
+            _ThermalResistance.Adjust(value);
             UpdateValues();
             base.StoreWrite(nameof(ThermalResistance));
         }
@@ -125,7 +125,7 @@ public class LdoPower : Calculator {
     public Measurement AmbientTemperature {
         get { return _AmbientTemperature; }
         set {
-            _AmbientTemperature = _AmbientTemperature.Adjust(value);
+            _AmbientTemperature.Adjust(value);
             UpdateValues();
             base.StoreWrite(nameof(AmbientTemperature));
         }
@@ -268,8 +268,8 @@ public class LdoPower : Calculator {
     private void UpdateValues() {
         var inputMax = InputVoltage * (100 + InputTolerance) / 100;
         var outputMin = OutputVoltage * (100 - OutputTolerance) / 100;
-        _PowerDissipation = _PowerDissipation.Adjust((inputMax - outputMin) * OutputCurrent);
-        _JunctionTemperature = _JunctionTemperature.Adjust(AmbientTemperature + PowerDissipation * ThermalResistance);
+        _PowerDissipation.Adjust((inputMax - outputMin) * OutputCurrent);
+        _JunctionTemperature.Adjust(AmbientTemperature + PowerDissipation * ThermalResistance);
     }
 
     #region Elements

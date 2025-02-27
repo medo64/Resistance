@@ -24,7 +24,7 @@ public class ESeries : Calculator {
     public Measurement Value {
         get { return _Value; }
         set {
-            _Value = _Value.Adjust(value);
+            _Value.Adjust(value);
             _E3d = new Measurement(Value, -2, NumberSeries.E3, NumberSeriesRounding.Down);
             _E6d = new Measurement(Value, -2, NumberSeries.E6, NumberSeriesRounding.Down);
             _E12d = new Measurement(Value, -2, NumberSeries.E12, NumberSeriesRounding.Down);

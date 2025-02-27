@@ -34,7 +34,7 @@ public class VoltageDivider : Calculator {
     public Measurement VRef {
         get { return _VRef; }
         set {
-            _VRef = _VRef.Adjust(value);
+            _VRef.Adjust(value);
             UpdateRatio();
             UpdateOther();
             base.StoreWrite(nameof(VRef));
@@ -48,7 +48,7 @@ public class VoltageDivider : Calculator {
     public Measurement VMax {
         get { return _VMax; }
         set {
-            _VMax = _VMax.Adjust(value);
+            _VMax.Adjust(value);
             UpdateRatio();
             UpdateOther();
             base.StoreWrite(nameof(VMax));
@@ -71,9 +71,9 @@ public class VoltageDivider : Calculator {
     public Measurement R1 {
         get { return _R1; }
         set {
-            _R1 = _R1.Adjust(value);
-            _Ratio = _Ratio.Adjust((R1 + R2) / R2);
-            _VMax = _VMax.Adjust(VRef * Ratio);
+            _R1.Adjust(value);
+            _Ratio.Adjust((R1 + R2) / R2);
+            _VMax.Adjust(VRef * Ratio);
             UpdateOther();
             base.StoreWrite(nameof(R1));
         }
@@ -86,7 +86,7 @@ public class VoltageDivider : Calculator {
     public Measurement R2 {
         get { return _R2; }
         set {
-            _R2 = _R2.Adjust(value);
+            _R2.Adjust(value);
             UpdateRatio();
             UpdateOther();
             base.StoreWrite(nameof(R2));
@@ -101,7 +101,7 @@ public class VoltageDivider : Calculator {
     public Measurement AdcBits {
         get { return _AdcBits; }
         set {
-            _AdcBits = _AdcBits.Adjust(value);
+            _AdcBits.Adjust(value);
             UpdateOther();
             base.StoreWrite(nameof(AdcBits));
         }
@@ -239,22 +239,22 @@ public class VoltageDivider : Calculator {
     private void UpdateRatio() {
         var ratio = VMax / VRef;
         if (ratio > 1) {
-            _Ratio = _Ratio.Adjust(ratio);
-            if (R2.IsNull) { _R2 = _R2.Adjust(10000); }
-            _R1 = _R1.Adjust(R2 * (Ratio - 1));
-            _VMax = _VMax.Adjust(VRef * (R1 + R2) / R2);
+            _Ratio.Adjust(ratio);
+            if (R2.IsNull) { _R2.Adjust(10000); }
+            _R1.Adjust(R2 * (Ratio - 1));
+            _VMax.Adjust(VRef * (R1 + R2) / R2);
         } else {
-            _Ratio = _Ratio.Adjust(1);
-            _R1 = _R1.Adjust(0);
-            _R2 = _R2.Adjust(null);
-            _VMax = _VMax.Adjust(VRef);
+            _Ratio.Adjust(1);
+            _R1.Adjust(0);
+            _R2.Adjust(null);
+            _VMax.Adjust(VRef);
         }
     }
 
     private void UpdateOther() {
-        _AdcSteps = _AdcSteps.Adjust((decimal)Math.Pow(2, (int)AdcBits));
-        _AdcLsb = _AdcLsb.Adjust(VMax / AdcSteps);
-        _Impedance = _Impedance.Adjust((R1 * R2) / (R1 + R2));
+        _AdcSteps.Adjust((decimal)Math.Pow(2, (int)AdcBits));
+        _AdcLsb.Adjust(VMax / AdcSteps);
+        _Impedance.Adjust((R1 * R2) / (R1 + R2));
     }
 
 

@@ -26,13 +26,13 @@ public class OhmLaw : Calculator {
     public Measurement Voltage {
         get { return _Voltage; }
         set {
-            _Voltage = _Voltage.Adjust(value);
+            _Voltage.Adjust(value);
             if (base.IsSecondMoreRecentlyChanged(nameof(Current), nameof(Resistance))) {
-                _Resistance = _Resistance.Adjust(Voltage / Current);
+                _Resistance.Adjust(Voltage / Current);
             } else {
-                _Current = _Current.Adjust(Voltage / Resistance);
+                _Current.Adjust(Voltage / Resistance);
             }
-            _Power = _Power.Adjust(Voltage * Current);
+            _Power.Adjust(Voltage * Current);
             base.StoreWrite(nameof(Voltage));
         }
     }
@@ -44,13 +44,13 @@ public class OhmLaw : Calculator {
     public Measurement Current {
         get { return _Current; }
         set {
-            _Current = _Current.Adjust(value);
+            _Current.Adjust(value);
             if (base.IsSecondMoreRecentlyChanged(nameof(Voltage), nameof(Resistance))) {
-                _Voltage = _Voltage.Adjust(Current * Resistance);
+                _Voltage.Adjust(Current * Resistance);
             } else {
-                _Resistance = _Resistance.Adjust(Voltage / Current);
+                _Resistance.Adjust(Voltage / Current);
             }
-            _Power = _Power.Adjust(Voltage * Current);
+            _Power.Adjust(Voltage * Current);
             base.StoreWrite(nameof(Current));
         }
     }
@@ -62,13 +62,13 @@ public class OhmLaw : Calculator {
     public Measurement Resistance {
         get { return _Resistance; }
         set {
-            _Resistance = _Resistance.Adjust(value);
+            _Resistance.Adjust(value);
             if (base.IsSecondMoreRecentlyChanged(nameof(Voltage), nameof(Current))) {
-                _Voltage = _Voltage.Adjust(Current * Resistance);
+                _Voltage.Adjust(Current * Resistance);
             } else {
-                _Current = _Current.Adjust(Voltage / Resistance);
+                _Current.Adjust(Voltage / Resistance);
             }
-            _Power = _Power.Adjust(Voltage * Current);
+            _Power.Adjust(Voltage * Current);
             base.StoreWrite(nameof(Resistance));
         }
     }
@@ -80,13 +80,13 @@ public class OhmLaw : Calculator {
     public Measurement Power {
         get { return _Power; }
         set {
-            _Power = _Power.Adjust(value);
+            _Power.Adjust(value);
             if (base.IsSecondMoreRecentlyChanged(nameof(Voltage), nameof(Current))) {
-                _Voltage = _Voltage.Adjust(Power / Current);
+                _Voltage.Adjust(Power / Current);
             } else {
-                _Current = _Current.Adjust(Power / Voltage);
+                _Current.Adjust(Power / Voltage);
             }
-            _Resistance = _Resistance.Adjust(Voltage / Current);
+            _Resistance.Adjust(Voltage / Current);
             base.StoreWrite(nameof(Power));
         }
     }

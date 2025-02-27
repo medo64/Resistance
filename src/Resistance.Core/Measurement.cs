@@ -10,7 +10,7 @@ using System.Text;
 /// <summary>
 /// Measurement instance.
 /// </summary>
-public readonly struct Measurement : IEquatable<Measurement> {
+public struct Measurement : IEquatable<Measurement> {
 
     /// <summary>
     /// Creates a new instance.
@@ -99,7 +99,7 @@ public readonly struct Measurement : IEquatable<Measurement> {
     }
 
 
-    private readonly decimal? Value;
+    private decimal? Value;
 
     /// <summary>
     /// Gets E-series rounding.
@@ -133,18 +133,18 @@ public readonly struct Measurement : IEquatable<Measurement> {
 
 
     /// <summary>
-    /// Adjusts the value.
+    /// Gets if value is null.
     /// </summary>
-    /// <param name="newValue">New value.</param>
-    public Measurement Adjust(decimal? newValue) {
-        return new(newValue, DigitCount, UseSI, Series, Rounding, MinValue, MaxValue);
-    }
+    public readonly bool IsNull => (Value is null);
 
 
     /// <summary>
-    /// Gets if value is null.
+    /// Adjusts the value.
     /// </summary>
-    public bool IsNull => Value is null;
+    /// <param name="newValue">New value.</param>
+    public void Adjust(decimal? newValue) {
+        Value = newValue;
+    }
 
 
     #region Overrides
@@ -166,12 +166,12 @@ public readonly struct Measurement : IEquatable<Measurement> {
 
     #region Formatting
 
-    public override string ToString() {
+    public override readonly string ToString() {
         if (Value is null) { return string.Empty; }
         return Value.Value.ToString(CultureInfo.InvariantCulture);
     }
 
-    public string ToString(CultureInfo? provider, string unit) {
+    public readonly string ToString(CultureInfo? provider, string unit) {
         if (Value is null) { return ""; }
         provider ??= CultureInfo.CurrentCulture;
 
@@ -203,7 +203,7 @@ public readonly struct Measurement : IEquatable<Measurement> {
         }
     }
 
-    private string GetString(CultureInfo provider, decimal scaledValue, char si, string unit) {
+    private readonly string GetString(CultureInfo provider, decimal scaledValue, char si, string unit) {
         var sb = new StringBuilder();
 
         if (DigitCount >= 0) {  // decimal digits
