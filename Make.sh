@@ -31,8 +31,8 @@ if [ "$HAS_CHANGES" -gt 0 ]; then
 fi
 
 
-PROJECT_NAME=$( cat "$SCRIPT_DIR/.meta" | grep -E "^PROJECT_NAME=" | sed  -n 1p | cut -d= -sf2 | xargs )
-echo "${ANSI_PURPLE}Project name : ${ANSI_MAGENTA}$PROJECT_NAME${ANSI_RESET}"
+PROJECT_NAME=$( cat "$SCRIPT_DIR/.meta" | grep -E "^PROJECT_NAME:" | sed  -n 1p | cut -d: -sf2 | xargs )
+echo "${ANSI_PURPLE}Project name ...: ${ANSI_MAGENTA}$PROJECT_NAME${ANSI_RESET}"
 
 
 GIT_VERSION=$( git tag --points-at HEAD | grep --color=always -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sed -n 1p | sed 's/^v//g' | xargs )
@@ -40,36 +40,42 @@ GIT_INDEX=$( git rev-list --count HEAD )
 GIT_HASH=$( git log -n 1 --format=%h )
 
 if [ "$GIT_VERSION" != "" ]; then
-    echo "${ANSI_PURPLE}Tag version .: ${ANSI_MAGENTA}$GIT_VERSION${ANSI_RESET}"
+    echo "${ANSI_PURPLE}Tag version ....: ${ANSI_MAGENTA}$GIT_VERSION${ANSI_RESET}"
 else
-    echo "${ANSI_PURPLE}Tag version .: ${ANSI_MAGENTA}-${ANSI_RESET}"
+    echo "${ANSI_PURPLE}Tag version ....: ${ANSI_MAGENTA}-${ANSI_RESET}"
 fi
-echo "${ANSI_PURPLE}Revision ....: ${ANSI_MAGENTA}$GIT_HASH${ANSI_PURPLE} (${ANSI_MAGENTA}$GIT_INDEX${ANSI_PURPLE})${ANSI_RESET}"
+echo "${ANSI_PURPLE}Revision .......: ${ANSI_MAGENTA}$GIT_HASH${ANSI_PURPLE} (${ANSI_MAGENTA}$GIT_INDEX${ANSI_PURPLE})${ANSI_RESET}"
 
-ENTRY_PROJECT=$( cat "$SCRIPT_DIR/.meta" | grep -E "^ENTRY_PROJECT=" | sed  -n 1p | cut -d= -sf2 | xargs )
-if [ -e "$SCRIPT_DIR/$ENTRY_PROJECT" ]; then
-    echo "${ANSI_PURPLE}Entry project: ${ANSI_MAGENTA}$ENTRY_PROJECT${ANSI_RESET}"
+PROJECT_START=$( cat "$SCRIPT_DIR/.meta" | grep -E "^PROJECT_START:" | sed  -n 1p | cut -d: -sf2 | xargs )
+if [ -e "$SCRIPT_DIR/$PROJECT_START" ]; then
+    echo "${ANSI_PURPLE}Start project ..: ${ANSI_MAGENTA}$PROJECT_START${ANSI_RESET}"
 else
-    echo "${ANSI_PURPLE}Entry project: ${ANSI_RED}not found${ANSI_RESET}" >&2
+    echo "${ANSI_PURPLE}Start project ..: ${ANSI_RED}not found${ANSI_RESET}" >&2
     exit 113
 fi
 
-DOCKER_IMAGE=$( cat "$SCRIPT_DIR/.meta" | grep -E "^DOCKER_IMAGE=" | sed  -n 1p | cut -d= -sf2 | xargs )
+PROJECT_RUNTIMES=$( cat "$SCRIPT_DIR/.meta" | grep -E "^PROJECT_RUNTIMES:" | sed  -n 1p | cut -d: -sf2 | xargs )
+if [ "$PROJECT_RUNTIMES" = "" ]; then
+    PROJECT_RUNTIMES=current
+fi
+echo "${ANSI_PURPLE}Project runtimes: ${ANSI_MAGENTA}$PROJECT_RUNTIMES${ANSI_RESET}"
+
+DOCKER_IMAGE=$( cat "$SCRIPT_DIR/.meta" | grep -E "^DOCKER_IMAGE:" | sed  -n 1p | cut -d: -sf2 | xargs )
 if [ "$DOCKER_IMAGE" != "" ]; then
     DOCKER_IMAGE_ID=$( echo "$DOCKER_IMAGE" | cut -d/ -sf1 )
     DOCKER_IMAGE_NAME=$( echo "$DOCKER_IMAGE" | cut -d/ -f2 )
     if [ "$DOCKER_IMAGE_ID" != "" ] && [ "$DOCKER_IMAGE_NAME" != "" ]; then
-        echo "${ANSI_PURPLE}Docker image : ${ANSI_MAGENTA}$DOCKER_IMAGE_ID/$DOCKER_IMAGE_NAME${ANSI_RESET}"
+        echo "${ANSI_PURPLE}Docker image ...: ${ANSI_MAGENTA}$DOCKER_IMAGE_ID/$DOCKER_IMAGE_NAME${ANSI_RESET}"
     else
-        echo "${ANSI_PURPLE}Docker image : ${ANSI_RED}not found${ANSI_RESET}" >&2
+        echo "${ANSI_PURPLE}Docker image ...: ${ANSI_RED}not found${ANSI_RESET}" >&2
         exit 113
     fi
 
     DOCKER_FILE="$(find "$SCRIPT_DIR/src" -type f -name "Dockerfile" -print | sed -n 1p)"
     if [ "$DOCKER_IMAGE_ID" != "" ] && [ "$DOCKER_IMAGE_NAME" != "" ]; then
-        echo "${ANSI_PURPLE}Docker source: ${ANSI_MAGENTA}$DOCKER_FILE${ANSI_RESET}"
+        echo "${ANSI_PURPLE}Docker source ..: ${ANSI_MAGENTA}$DOCKER_FILE${ANSI_RESET}"
     else
-        echo "${ANSI_PURPLE}Docker source: ${ANSI_RED}not found${ANSI_RESET}" >&2
+        echo "${ANSI_PURPLE}Docker source ..: ${ANSI_RED}not found${ANSI_RESET}" >&2
         exit 113
     fi
 fi
@@ -109,7 +115,7 @@ make_run() {
     echo "${ANSI_MAGENTA}┗━━━━━┛${ANSI_RESET}"
     echo
 
-    dotnet run --project "$SCRIPT_DIR/$ENTRY_PROJECT"
+    dotnet run --project "$SCRIPT_DIR/$PROJECT_START"
 }
 
 make_test() {
@@ -133,7 +139,7 @@ make_debug() {
     echo
 
     mkdir -p "$SCRIPT_DIR/bin"
-    dotnet build "$SCRIPT_DIR/$ENTRY_PROJECT" --configuration Debug --output "$SCRIPT_DIR/bin"
+    dotnet build "$SCRIPT_DIR/$PROJECT_START" --configuration Debug --output "$SCRIPT_DIR/bin"
 }
 
 make_release() {
@@ -150,22 +156,31 @@ make_release() {
     fi
 
     mkdir -p "$SCRIPT_DIR/bin"
-    dotnet publish "$SCRIPT_DIR/$ENTRY_PROJECT" \
-        --configuration Release --output "$SCRIPT_DIR/bin" \
-        --self-contained true --use-current-runtime \
-        -p:GenerateDocumentationFile=false \
-        -p:AssemblyVersion=$ASSEMBLY_VERSION -p:FileVersion=$ASSEMBLY_VERSION \
-        -p:Version=$ASSEMBLY_VERSION+$GIT_HASH \
-        -p:PublishReadyToRun=true -p:PublishSingleFile=true
-
-    mkdir -p "$SCRIPT_DIR/bin/linux-musl-x64"
-    dotnet publish "$SCRIPT_DIR/$ENTRY_PROJECT" \
-        --configuration Release --output "$SCRIPT_DIR/bin/linux-musl-x64" \
-        --self-contained true --runtime linux-musl-x64 \
-        -p:GenerateDocumentationFile=false \
-        -p:AssemblyVersion=$ASSEMBLY_VERSION -p:FileVersion=$ASSEMBLY_VERSION \
-        -p:Version=$ASSEMBLY_VERSION+$GIT_HASH \
-        -p:PublishReadyToRun=true -p:PublishSingleFile=true
+    for RUNTIME in $PROJECT_RUNTIMES; do
+        echo "${ANSI_MAGENTA}$RUNTIME${ANSI_RESET}"
+        if [ "$RUNTIME" = "current" ]; then
+            dotnet publish "$SCRIPT_DIR/$PROJECT_START"                               \
+                --configuration Release --output "$SCRIPT_DIR/bin"                    \
+                --self-contained true --use-current-runtime                           \
+                -p:GenerateDocumentationFile=false                                    \
+                -p:AssemblyVersion=$ASSEMBLY_VERSION -p:FileVersion=$ASSEMBLY_VERSION \
+                -p:Version=$ASSEMBLY_VERSION+$GIT_HASH                                \
+                -p:PublishReadyToRun=true -p:PublishSingleFile=true                   \
+            && echo "${ANSI_CYAN}$SCRIPT_DIR/bin${ANSI_RESET}"
+            echo
+        else
+            mkdir -p "$SCRIPT_DIR/bin/$RUNTIME"
+            dotnet publish "$SCRIPT_DIR/$PROJECT_START"                               \
+                --configuration Release --output "$SCRIPT_DIR/bin/$RUNTIME"           \
+                --self-contained true --runtime $RUNTIME                              \
+                -p:GenerateDocumentationFile=false                                    \
+                -p:AssemblyVersion=$ASSEMBLY_VERSION -p:FileVersion=$ASSEMBLY_VERSION \
+                -p:Version=$ASSEMBLY_VERSION+$GIT_HASH                                \
+                -p:PublishReadyToRun=true -p:PublishSingleFile=true                   \
+            && echo "${ANSI_CYAN}$SCRIPT_DIR/bin/$RUNTIME${ANSI_RESET}"
+            echo
+        fi
+    done
 }
 
 make_package() {

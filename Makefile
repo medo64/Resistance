@@ -1,6 +1,6 @@
 #~ .NET Project
 
-.PHONY: default clean run test release docker publish
+.PHONY: default clean run test release package publish
 default: release
 
 clean:                  # Clean temporary files
@@ -18,7 +18,7 @@ debug:                  # Build the debug version and place it into the bin fold
 release:                # Build the release version and place it into the bin folder
 	@./Make.sh release
 
-package:                 # Build packages
+package:                # Build packages
 	@./Make.sh package
 
 publish:                # Publish the packages

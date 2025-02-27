@@ -1,2 +1,3 @@
-PROJECT_NAME=resistance
-ENTRY_PROJECT=src/Resistance.Gui/Resistance.Gui.csproj
+PROJECT_NAME:     resistance
+PROJECT_START:    src/Resistance.Gui/Resistance.Gui.csproj
+PROJECT_RUNTIMES: current linux-x64 linux-musl-x64 win-x64
