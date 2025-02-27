@@ -19,9 +19,9 @@ public class Led : Calculator {
         _ForwardCurrent = new Measurement(StoreRead(nameof(ForwardCurrent), 0.001), digitCount: 3, useSI: true, minValue: 0, maxValue: null);
         _ResistorValue = new Measurement(null, digitCount: -2, NumberSeries.E24, NumberSeriesRounding.Up);
 
-        _ResistorVoltageDrop = new Measurement(null, digitCount: -3, useSI: true);
-        _ResistorCurrentFlow = new Measurement(null, digitCount: -3, useSI: true);
-        _ResistorPowerDissipation = new Measurement(null, digitCount: -3, useSI: true);
+        _ResistorVoltageDrop = new Measurement(null, digitCount: 0, useSI: true);
+        _ResistorCurrentFlow = new Measurement(null, digitCount: 0, useSI: true);
+        _ResistorPowerDissipation = new Measurement(null, digitCount: 0, useSI: true);
         _ResistorPowerRating = "";
 
         UpdateResistance();
@@ -110,58 +110,58 @@ public class Led : Calculator {
     }
 
 
-    [Category("Common 20 mA LEDs")]
+    [Category("Common 1 mA LEDs")]
     [DisplayName("Infrared")]
-    public void CmdInfrared20() { ForwardVoltage = 1.6; ForwardCurrent = 0.020; }
+    public void CmdInfrared01() { ForwardVoltage = 1.6; ForwardCurrent = 0.001; }
 
-    [Category("Common 20 mA LEDs")]
+    [Category("Common 1 mA LEDs")]
     [DisplayName("Red")]
     [BackgroundColor("f44")]
-    public void CmdRed20() { ForwardVoltage = 1.8; ForwardCurrent = 0.020; }
+    public void CmdRed01() { ForwardVoltage = 1.8; ForwardCurrent = 0.001; }
 
-    [Category("Common 20 mA LEDs")]
+    [Category("Common 1 mA LEDs")]
     [DisplayName("Orange")]
     [BackgroundColor("f70")]
-    public void CmdOrange20() { ForwardVoltage = 2.1; ForwardCurrent = 0.020; }
+    public void CmdOrange01() { ForwardVoltage = 2.1; ForwardCurrent = 0.001; }
 
-    [Category("Common 20 mA LEDs")]
+    [Category("Common 1 mA LEDs")]
     [DisplayName("Yellow")]
     [BackgroundColor("ee0")]
-    public void CmdYellow20() { ForwardVoltage = 2.1; ForwardCurrent = 0.020; }
+    public void CmdYellow01() { ForwardVoltage = 2.1; ForwardCurrent = 0.001; }
 
-    [Category("Common 20 mA LEDs")]
+    [Category("Common 1 mA LEDs")]
     [DisplayName("Green")]
     [BackgroundColor("7f0")]
-    public void CmdGreen20() { ForwardVoltage = 3.0; ForwardCurrent = 0.020; }
+    public void CmdGreen01() { ForwardVoltage = 3.0; ForwardCurrent = 0.001; }
 
-    [Category("Common 20 mA LEDs")]
+    [Category("Common 1 mA LEDs")]
     [DisplayName("Blue")]
     [BackgroundColor("55f")]
-    public void CmdBlue20() { ForwardVoltage = 3.1; ForwardCurrent = 0.020; }
+    public void CmdBlue01() { ForwardVoltage = 3.1; ForwardCurrent = 0.001; }
 
-    [Category("Common 20 mA LEDs")]
+    [Category("Common 1 mA LEDs")]
     [DisplayName("Purple")]
     [BackgroundColor("a0a")]
-    public void CmdPurple20() { ForwardVoltage = 3.1; ForwardCurrent = 0.020; }
+    public void CmdPurple01() { ForwardVoltage = 3.1; ForwardCurrent = 0.001; }
 
-    [Category("Common 20 mA LEDs")]
+    [Category("Common 1 mA LEDs")]
     [DisplayName("Pink")]
     [BackgroundColor("f7f")]
-    public void CmdPink20() { ForwardVoltage = 3.3; ForwardCurrent = 0.020; }
+    public void CmdPink01() { ForwardVoltage = 3.3; ForwardCurrent = 0.001; }
 
-    [Category("Common 20 mA LEDs")]
+    [Category("Common 1 mA LEDs")]
     [DisplayName("Violet")]
     [BackgroundColor("70f")]
-    public void CmdViolet20() { ForwardVoltage = 3.4; ForwardCurrent = 0.020; }
+    public void CmdViolet01() { ForwardVoltage = 3.4; ForwardCurrent = 0.001; }
 
-    [Category("Common 20 mA LEDs")]
+    [Category("Common 1 mA LEDs")]
     [DisplayName("Ultraviolet")]
-    public void CmdUltraviolet20() { ForwardVoltage = 3.8; ForwardCurrent = 0.020; }
+    public void CmdUltraviolet01() { ForwardVoltage = 3.8; ForwardCurrent = 0.001; }
 
-    [Category("Common 20 mA LEDs")]
+    [Category("Common 1 mA LEDs")]
     [DisplayName("White")]
     [BackgroundColor("ffffff")]
-    public void CmdWhite20() { ForwardVoltage = 3.5; ForwardCurrent = 0.020; }
+    public void CmdWhite01() { ForwardVoltage = 3.5; ForwardCurrent = 0.001; }
 
 
     [Category("Common 10 mA LEDs")]
@@ -218,58 +218,58 @@ public class Led : Calculator {
     public void CmdWhite10() { ForwardVoltage = 3.5; ForwardCurrent = 0.010; }
 
 
-    [Category("Common 1 mA LEDs")]
+    [Category("Common 20 mA LEDs")]
     [DisplayName("Infrared")]
-    public void CmdInfrared01() { ForwardVoltage = 1.6; ForwardCurrent = 0.001; }
+    public void CmdInfrared20() { ForwardVoltage = 1.6; ForwardCurrent = 0.020; }
 
-    [Category("Common 1 mA LEDs")]
+    [Category("Common 20 mA LEDs")]
     [DisplayName("Red")]
     [BackgroundColor("f44")]
-    public void CmdRed01() { ForwardVoltage = 1.8; ForwardCurrent = 0.001; }
+    public void CmdRed20() { ForwardVoltage = 1.8; ForwardCurrent = 0.020; }
 
-    [Category("Common 1 mA LEDs")]
+    [Category("Common 20 mA LEDs")]
     [DisplayName("Orange")]
     [BackgroundColor("f70")]
-    public void CmdOrange01() { ForwardVoltage = 2.1; ForwardCurrent = 0.001; }
+    public void CmdOrange20() { ForwardVoltage = 2.1; ForwardCurrent = 0.020; }
 
-    [Category("Common 1 mA LEDs")]
+    [Category("Common 20 mA LEDs")]
     [DisplayName("Yellow")]
     [BackgroundColor("ee0")]
-    public void CmdYellow01() { ForwardVoltage = 2.1; ForwardCurrent = 0.001; }
+    public void CmdYellow20() { ForwardVoltage = 2.1; ForwardCurrent = 0.020; }
 
-    [Category("Common 1 mA LEDs")]
+    [Category("Common 20 mA LEDs")]
     [DisplayName("Green")]
     [BackgroundColor("7f0")]
-    public void CmdGreen01() { ForwardVoltage = 3.0; ForwardCurrent = 0.001; }
+    public void CmdGreen20() { ForwardVoltage = 3.0; ForwardCurrent = 0.020; }
 
-    [Category("Common 1 mA LEDs")]
+    [Category("Common 20 mA LEDs")]
     [DisplayName("Blue")]
     [BackgroundColor("55f")]
-    public void CmdBlue01() { ForwardVoltage = 3.1; ForwardCurrent = 0.001; }
+    public void CmdBlue20() { ForwardVoltage = 3.1; ForwardCurrent = 0.020; }
 
-    [Category("Common 1 mA LEDs")]
+    [Category("Common 20 mA LEDs")]
     [DisplayName("Purple")]
     [BackgroundColor("a0a")]
-    public void CmdPurple01() { ForwardVoltage = 3.1; ForwardCurrent = 0.001; }
+    public void CmdPurple20() { ForwardVoltage = 3.1; ForwardCurrent = 0.020; }
 
-    [Category("Common 1 mA LEDs")]
+    [Category("Common 20 mA LEDs")]
     [DisplayName("Pink")]
     [BackgroundColor("f7f")]
-    public void CmdPink01() { ForwardVoltage = 3.3; ForwardCurrent = 0.001; }
+    public void CmdPink20() { ForwardVoltage = 3.3; ForwardCurrent = 0.020; }
 
-    [Category("Common 1 mA LEDs")]
+    [Category("Common 20 mA LEDs")]
     [DisplayName("Violet")]
     [BackgroundColor("70f")]
-    public void CmdViolet01() { ForwardVoltage = 3.4; ForwardCurrent = 0.001; }
+    public void CmdViolet20() { ForwardVoltage = 3.4; ForwardCurrent = 0.020; }
 
-    [Category("Common 1 mA LEDs")]
+    [Category("Common 20 mA LEDs")]
     [DisplayName("Ultraviolet")]
-    public void CmdUltraviolet01() { ForwardVoltage = 3.8; ForwardCurrent = 0.001; }
+    public void CmdUltraviolet20() { ForwardVoltage = 3.8; ForwardCurrent = 0.020; }
 
-    [Category("Common 1 mA LEDs")]
+    [Category("Common 20 mA LEDs")]
     [DisplayName("White")]
     [BackgroundColor("ffffff")]
-    public void CmdWhite01() { ForwardVoltage = 3.5; ForwardCurrent = 0.001; }
+    public void CmdWhite20() { ForwardVoltage = 3.5; ForwardCurrent = 0.020; }
 
 
     [Category("Source Voltage")]
@@ -330,9 +330,9 @@ public class Led : Calculator {
             nameof(SourceVoltage),
             nameof(ForwardVoltage), nameof(ForwardCurrent),
             nameof(ResistorValue), nameof(ResistorPowerDissipation), nameof(ResistorPowerRating), nameof(ResistorVoltageDrop), nameof(ResistorCurrentFlow),
-            nameof(CmdInfrared20), nameof(CmdRed20), nameof(CmdOrange20), nameof(CmdYellow20), nameof(CmdGreen20), nameof(CmdBlue20), nameof(CmdPurple20), nameof(CmdPink20), nameof(CmdViolet20), nameof(CmdUltraviolet20), nameof(CmdWhite20),
-            nameof(CmdInfrared10), nameof(CmdRed10), nameof(CmdOrange10), nameof(CmdYellow10), nameof(CmdGreen10), nameof(CmdBlue10), nameof(CmdPurple10), nameof(CmdPink10), nameof(CmdViolet10), nameof(CmdUltraviolet10), nameof(CmdWhite10),
             nameof(CmdInfrared01), nameof(CmdRed01), nameof(CmdOrange01), nameof(CmdYellow01), nameof(CmdGreen01), nameof(CmdBlue01), nameof(CmdPurple01), nameof(CmdPink01), nameof(CmdViolet01), nameof(CmdUltraviolet01), nameof(CmdWhite01),
+            nameof(CmdInfrared10), nameof(CmdRed10), nameof(CmdOrange10), nameof(CmdYellow10), nameof(CmdGreen10), nameof(CmdBlue10), nameof(CmdPurple10), nameof(CmdPink10), nameof(CmdViolet10), nameof(CmdUltraviolet10), nameof(CmdWhite10),
+            nameof(CmdInfrared20), nameof(CmdRed20), nameof(CmdOrange20), nameof(CmdYellow20), nameof(CmdGreen20), nameof(CmdBlue20), nameof(CmdPurple20), nameof(CmdPink20), nameof(CmdViolet20), nameof(CmdUltraviolet20), nameof(CmdWhite20),
             nameof(CmdSourceVoltage033), nameof(CmdSourceVoltage050), nameof(CmdSourceVoltage090), nameof(CmdSourceVoltage120), nameof(CmdSourceVoltage150), nameof(CmdSourceVoltage200), nameof(CmdSourceVoltage240),
         ]);
     }

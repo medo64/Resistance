@@ -143,7 +143,7 @@ public struct Measurement : IEquatable<Measurement> {
     /// </summary>
     /// <param name="newValue">New value.</param>
     public void Adjust(decimal? newValue) {
-        Value = newValue;
+        Value = new Measurement(newValue, DigitCount, UseSI, Series, Rounding, MinValue, MaxValue).Value;
     }
 
 
