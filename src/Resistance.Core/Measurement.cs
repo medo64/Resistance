@@ -10,6 +10,7 @@ using System.Text;
 /// <summary>
 /// Measurement instance.
 /// </summary>
+[DebuggerDisplay("{Value}")]
 public struct Measurement : IEquatable<Measurement> {
 
     /// <summary>
