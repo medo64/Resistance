@@ -20,7 +20,7 @@ public class VoltageDivider : Calculator {
         _R2 = new Measurement(StoreRead(nameof(R2), 10000), digitCount: -3, useSI: true, minValue: 0, maxValue: null);
         _AdcBits = new Measurement(StoreRead(nameof(AdcBits), 12), digitCount: 0, useSI: false, minValue: 4, maxValue: 32);
         _AdcSteps = new Measurement(null, digitCount: 0, useSI: false);
-        _AdcLsb = new Measurement(null, digitCount: 0, useSI: false);
+        _AdcLsb = new Measurement(null, digitCount: -3, useSI: true);
         _Impedance = new Measurement(null, digitCount: -3, useSI: true);
         UpdateRatio();
         UpdateOther();
