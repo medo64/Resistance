@@ -8,15 +8,15 @@ using System.ComponentModel;
 /// <summary>
 /// Ohm law calculator.
 /// </summary>
-public class LM117 : Calculator {
+public class LM317 : Calculator {
 
-    public LM117()
-        : base("LM117", "Calculate settings for LM117 voltage regulator.") {
+    public LM317()
+        : base("LM317", "Calculate settings for LM317 voltage regulator.") {
 
         _InputVoltage = new Measurement(StoreRead(nameof(InputVoltage), 12), digitCount: 3, useSI: true, minValue: 0, maxValue: null);
         _DesiredVoltage = new Measurement(StoreRead(nameof(DesiredVoltage), 5), digitCount: 3, useSI: true, minValue: 0, maxValue: null);
         _DesiredCurrent = new Measurement(StoreRead(nameof(DesiredCurrent), 0.1m), digitCount: 3, useSI: true, minValue: 0, maxValue: null);
-        _R1 = new Measurement(StoreRead(nameof(R1), 240), digitCount: -3, NumberSeries.E24, NumberSeriesRounding.Nearest, minValue: 220, maxValue: 270);
+        _R1 = new Measurement(StoreRead(nameof(R1), 120), digitCount: -3, NumberSeries.E24, NumberSeriesRounding.Nearest, minValue: 110, maxValue: 130);
         _R2 = new Measurement(null, digitCount: -3, NumberSeries.E24, NumberSeriesRounding.Nearest);
         _OutputVoltage = new Measurement(null, digitCount: 2, useSI: true);
         _MinimumLoad = new Measurement(null, digitCount: 1, useSI: true);
@@ -123,10 +123,10 @@ public class LM117 : Calculator {
 
     private void Update() {
         _R2.Adjust(R1 * (DesiredVoltage - 1.25));
-        _OutputVoltage.Adjust(1.25m + (R2 / R1));
+        _OutputVoltage.Adjust(1.25 + (R2 / R1));
         _VoltageDrop.Adjust(InputVoltage - OutputVoltage);
         _PowerDissipation.Adjust(VoltageDrop * DesiredCurrent);
-        _MinimumLoad.Adjust(1.25m / R1);
+        _MinimumLoad.Adjust(1.25 / R1);
     }
 
 
@@ -153,8 +153,8 @@ public class LM117 : Calculator {
 
 
     [Category("Resistors")]
-    [DisplayName("240 Ω")]
-    public void CmdR1() { R1 = 240; }
+    [DisplayName("120 Ω")]
+    public void CmdR1() { R1 = 120; }
 
 
     #region Elements
@@ -174,7 +174,7 @@ public class LM117 : Calculator {
     /// <inheritdoc/>
     public override ReadOnlyCollection<KeyValuePair<string, string>> GetExampleImageResources() {
         return new ReadOnlyCollection<KeyValuePair<string, string>>([
-            new KeyValuePair<string,string>("Lm117.png", "Example circuit"),
+            new KeyValuePair<string,string>("Lm317.png", "Example circuit"),
         ]);
     }
 
