@@ -214,6 +214,15 @@ public abstract class Calculator {
         ArgumentNullException.ThrowIfNull(measurementName);
         ArgumentNullException.ThrowIfNull(text);
 
+        var calculatorType = calculator.GetType();
+        var measurementProperty = calculatorType.GetProperty(measurementName);
+        if (measurementProperty is null) { return; }
+
+        if (string.IsNullOrWhiteSpace(text)) {
+            measurementProperty.SetValue(calculator, Measurement.Null);
+            return;
+        }
+
         var isValue = true;
         var sbSuffix = new StringBuilder();
         var sbValue = new StringBuilder();
@@ -229,10 +238,6 @@ public abstract class Calculator {
                 sbSuffix.Append(ch);
             }
         }
-
-        var calculatorType = calculator.GetType();
-        var measurementProperty = calculatorType.GetProperty(measurementName);
-        if (measurementProperty is null) { return; }
 
         if (decimal.TryParse(sbValue.ToString(), NumberStyles.Any, CultureInfo.CurrentCulture, out var value)) {
             var suffix = sbSuffix.ToString();
@@ -340,6 +345,7 @@ public abstract class Calculator {
         new MicrochipPicPwm(),
         new MicrochipPicTmr0(),
         new OhmLaw(),
+        new ParallelAndSeriesResistors(),
         new VoltageDivider(),
     ]);
 
