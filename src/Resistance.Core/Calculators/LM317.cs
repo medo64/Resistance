@@ -131,25 +131,45 @@ public class LM317 : Calculator {
 
 
     [Category("Input Voltages")]
+    [DisplayName("3.3 V")]
+    public void CmdInputVoltage033() { InputVoltage = 3.3m; }
+
+    [Category("Input Voltages")]
     [DisplayName("5 V")]
-    public void CmdInputVoltage05() { InputVoltage = 5; }
+    public void CmdInputVoltage050() { InputVoltage = 5; }
 
     [Category("Input Voltages")]
     [DisplayName("9 V")]
-    public void CmdInputVoltage09() { InputVoltage = 9; }
+    public void CmdInputVoltage090() { InputVoltage = 9; }
 
     [Category("Input Voltages")]
     [DisplayName("12 V")]
-    public void CmdInputVoltage12() { InputVoltage = 12; }
+    public void CmdInputVoltage120() { InputVoltage = 12; }
+
+    [Category("Input Voltages")]
+    [DisplayName("24 V")]
+    public void CmdInputVoltage240() { InputVoltage = 24; }
 
 
-    [Category("~Output Voltages")]
+    [Category("Output Voltages")]
+    [DisplayName("1.5 V")]
+    public void CmdOutputVoltage015() { DesiredVoltage = 1.5m; }
+
+    [Category("Output Voltages")]
+    [DisplayName("1.8 V")]
+    public void CmdOutputVoltage018() { DesiredVoltage = 1.8m; }
+
+    [Category("Output Voltages")]
+    [DisplayName("2.5 V")]
+    public void CmdOutputVoltage025() { DesiredVoltage = 2.5m; }
+
+    [Category("Output Voltages")]
     [DisplayName("3.3 V")]
-    public void CmdOutputVoltage33() { DesiredVoltage = 3.3m; }
+    public void CmdOutputVoltage033() { DesiredVoltage = 3.3m; }
 
-    [Category("~Output Voltages")]
+    [Category("Output Voltages")]
     [DisplayName("5 V")]
-    public void CmdOutputVoltage50() { DesiredVoltage = 5m; }
+    public void CmdOutputVoltage050() { DesiredVoltage = 5; }
 
 
     [Category("Resistors")]
@@ -165,8 +185,8 @@ public class LM317 : Calculator {
             nameof(InputVoltage), nameof(DesiredVoltage), nameof(DesiredCurrent),
             nameof(R1), nameof(R2),
             nameof(OutputVoltage), nameof(MinimumLoad), nameof(VoltageDrop), nameof(PowerDissipation),
-            nameof(CmdInputVoltage05), nameof(CmdInputVoltage09), nameof(CmdInputVoltage12),
-            nameof(CmdOutputVoltage33), nameof(CmdOutputVoltage50),
+            nameof(CmdInputVoltage033), nameof(CmdInputVoltage050), nameof(CmdInputVoltage090), nameof(CmdInputVoltage120), nameof(CmdInputVoltage240),
+            nameof(CmdOutputVoltage015), nameof(CmdOutputVoltage018), nameof(CmdOutputVoltage025), nameof(CmdOutputVoltage033), nameof(CmdOutputVoltage050),
             nameof(CmdR1),
         ]);
     }
