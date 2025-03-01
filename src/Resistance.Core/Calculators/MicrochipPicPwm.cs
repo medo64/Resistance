@@ -11,7 +11,7 @@ using System.ComponentModel;
 public class MicrochipPicPwm : Calculator {
 
     public MicrochipPicPwm()
-        : base("Microchip PIC PWM", "Calculate Microchip TMR0 settings.") {
+        : base("Microchip PIC PWM", "Calculate Microchip PWM settings.") {
         _ClockFrequency = new Measurement(StoreRead(nameof(ClockFrequency), 48000000), digitCount: 1, useSI: true, minValue: 0, maxValue: null);
         _Pr2Register = new Measurement(StoreRead(nameof(PR2Register), 255), digitCount: 1, useSI: true, minValue: 0, maxValue: 255);
         _Tmr2Prescaler = new Measurement(StoreRead(nameof(Tmr2Prescaler), 4), digitCount: 1, useSI: false, minValue: 1, maxValue: 4);
