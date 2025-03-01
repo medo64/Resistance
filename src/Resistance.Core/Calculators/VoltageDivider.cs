@@ -16,8 +16,8 @@ public class VoltageDivider : Calculator {
         _VRef = new Measurement(StoreRead(nameof(VRef), 2.048m), digitCount: 3, useSI: true, minValue: 0, maxValue: null);
         _VMax = new Measurement(StoreRead(nameof(VMax), 2.048m), digitCount: 3, useSI: true, minValue: 0, maxValue: null);
         _Ratio = new Measurement(null, digitCount: 2, useSI: false);
-        _R1 = new Measurement(StoreRead(nameof(R1), 30000), digitCount: -3, useSI: true, minValue: 0, maxValue: null);
-        _R2 = new Measurement(StoreRead(nameof(R2), 10000), digitCount: -3, useSI: true, minValue: 0, maxValue: null);
+        _R1 = new Measurement(StoreRead(nameof(R1), 30000), digitCount: -3, NumberSeries.E192, NumberSeriesRounding.Up, minValue: 0, maxValue: null);
+        _R2 = new Measurement(StoreRead(nameof(R2), 10000), digitCount: -3, NumberSeries.E24, NumberSeriesRounding.Nearest, minValue: 0, maxValue: null);
         _AdcBits = new Measurement(StoreRead(nameof(AdcBits), 12), digitCount: 0, useSI: false, minValue: 4, maxValue: 32);
         _AdcSteps = new Measurement(null, digitCount: 0, useSI: false);
         _AdcLsb = new Measurement(null, digitCount: -3, useSI: true);
@@ -66,7 +66,7 @@ public class VoltageDivider : Calculator {
 
     private Measurement _R1;
     [Category("~Resistor Values")]
-    [DisplayName("R1")]
+    [DisplayName("R1 ({SeriesText})")]
     [MeasurementUnit("Ω")]
     public Measurement R1 {
         get { return _R1; }
@@ -81,7 +81,7 @@ public class VoltageDivider : Calculator {
 
     private Measurement _R2;
     [Category("~Resistor Values")]
-    [DisplayName("R2")]
+    [DisplayName("R2 ({SeriesText}")]
     [MeasurementUnit("Ω")]
     public Measurement R2 {
         get { return _R2; }
@@ -275,6 +275,83 @@ public class VoltageDivider : Calculator {
     public void CmdR210k() { R2 = 10000; }
 
 
+    [Category("R1 Series")]
+    [DisplayName("E24")]
+    public void CmdR1E24() {
+        _R1.AdjustSeriesEx(NumberSeries.E24);
+        Update();
+    }
+
+    [Category("R1 Series")]
+    [DisplayName("E48")]
+    public void CmdR1E48() {
+        _R1.AdjustSeriesEx(NumberSeries.E48);
+        Update();
+    }
+
+    [Category("R1 Series")]
+    [DisplayName("E96")]
+    public void CmdR1E96() {
+        _R1.AdjustSeriesEx(NumberSeries.E96);
+        Update();
+    }
+
+    [Category("R1 Series")]
+    [DisplayName("E192")]
+    public void CmdR1E192() {
+        _R1.AdjustSeriesEx(NumberSeries.E192);
+        Update();
+    }
+
+    [Category("R1 Series")]
+    [DisplayName("None")]
+    public void CmdR1None() {
+        _R1.AdjustSeriesEx(NumberSeries.None);
+        Update();
+    }
+
+
+    [Category("~R2 Series")]
+    [DisplayName("E24")]
+    public void CmdR2E24() {
+        _R2.AdjustSeriesEx(NumberSeries.E24);
+        Update();
+    }
+
+    [Category("~R2 Series")]
+    [DisplayName("E48")]
+    public void CmdR2E48() {
+        _R2.AdjustSeriesEx(NumberSeries.E48);
+        Update();
+    }
+
+    [Category("~R2 Series")]
+    [DisplayName("E96")]
+    public void CmdR2E96() {
+        _R2.AdjustSeriesEx(NumberSeries.E96);
+        Update();
+    }
+
+    [Category("~R2 Series")]
+    [DisplayName("E192")]
+    public void CmdR2E192() {
+        _R2.AdjustSeriesEx(NumberSeries.E192);
+        Update();
+    }
+
+    [Category("~R2 Series")]
+    [DisplayName("None")]
+    public void CmdR2None() {
+        _R2.AdjustSeriesEx(NumberSeries.None);
+        Update();
+    }
+
+
+    private void Update() {
+        UpdateRatio();
+        UpdateOther();
+    }
+
     private void UpdateRatio() {
         var ratio = VMax / VRef;
         if (ratio > 1) {
@@ -308,6 +385,8 @@ public class VoltageDivider : Calculator {
             nameof(CmdVMax05P), nameof(CmdVMax09P), nameof(CmdVMax12P), nameof(CmdVMax15P), nameof(CmdVMax24P), nameof(CmdVMax30P), nameof(CmdVMax36P), nameof(CmdVMax48P), nameof(CmdVMax60P),
             nameof (CmdAdcBits08), nameof (CmdAdcBits10), nameof (CmdAdcBits12), nameof (CmdAdcBits14), nameof (CmdAdcBits16), nameof (CmdAdcBits18),
             nameof(CmdR21k), nameof(CmdR210k),
+            nameof(CmdR1E24), nameof(CmdR1E48), nameof(CmdR1E96), nameof(CmdR1E192), nameof(CmdR1None),
+            nameof(CmdR2E24), nameof(CmdR2E48), nameof(CmdR2E96), nameof(CmdR2E192), nameof(CmdR2None),
         ]);
     }
 

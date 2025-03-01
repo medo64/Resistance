@@ -86,6 +86,7 @@ internal partial class MainWindow : Window {
                     Foreground = BrushHelpers.SystemBaseMediumHighColor,
                     HorizontalAlignment = HorizontalAlignment.Left,
                     Text = displayName + ":",
+                    Tag = new TagBag { ElementName = elementName }
                 };
                 pnlGroup.Children.Add(displayNameTextBlock);
 
@@ -155,7 +156,9 @@ internal partial class MainWindow : Window {
             var resourceName = exampleImageResource.Key;
             var caption = exampleImageResource.Value;
 
-            var imageStack = new StackPanel();
+            var imageStack = new StackPanel() {
+                Margin = new Thickness(48, 0)
+            };
             pnlOther.Children.Add(imageStack);
 
             var captionTextBlock = new TextBlock() {
@@ -190,6 +193,12 @@ internal partial class MainWindow : Window {
         foreach (var control in controls) {
             if (control is StackPanel subcontrols) {
                 UpdateControls(calculator, subcontrols.Children);
+            } else if (control is TextBlock textBlock) {
+                var bag = textBlock.Tag as TagBag;
+                if ((bag is not null) && (bag.ElementName is not null)) {
+                    var value = Calculator.GetGuiDisplayName(calculator, bag.ElementName);
+                    if (textBlock.Text != value) { textBlock.Text = value; }
+                }
             } else if (control is TextBox textBox) {
                 var bag = textBox.Tag as TagBag;
                 if ((bag is not null) && (bag.ElementName is not null)) {

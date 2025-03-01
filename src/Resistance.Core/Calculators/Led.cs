@@ -71,7 +71,7 @@ public class Led : Calculator {
 
     private Measurement _ResistorValue;
     [Category("~Resistor Properties")]
-    [DisplayName("Resistance")]
+    [DisplayName("Resistance ({SeriesText})")]
     [MeasurementUnit("Ω")]
     public Measurement ResistorValue {
         get { return _ResistorValue; }
@@ -301,6 +301,35 @@ public class Led : Calculator {
     public void CmdSourceVoltage240() { SourceVoltage = 24; }
 
 
+    [Category("Resistance Series")]
+    [DisplayName("E24")]
+    public void CmdR2E24() {
+        _ResistorValue.AdjustSeriesEx(NumberSeries.E24);
+        UpdateResistance();
+    }
+
+    [Category("Resistance Series")]
+    [DisplayName("E48")]
+    public void CmdR2E48() {
+        _ResistorValue.AdjustSeriesEx(NumberSeries.E48);
+        UpdateResistance();
+    }
+
+    [Category("Resistance Series")]
+    [DisplayName("E96")]
+    public void CmdR2E96() {
+        _ResistorValue.AdjustSeriesEx(NumberSeries.E96);
+        UpdateResistance();
+    }
+
+    [Category("Resistance Series")]
+    [DisplayName("E192")]
+    public void CmdR2E192() {
+        _ResistorValue.AdjustSeriesEx(NumberSeries.E192);
+        UpdateResistance();
+    }
+
+
     private void UpdateResistance() {
         _ResistorVoltageDrop.Adjust(SourceVoltage - ForwardVoltage);
         _ResistorValue.Adjust(ResistorVoltageDrop / ForwardCurrent);
@@ -334,6 +363,7 @@ public class Led : Calculator {
             nameof(CmdInfrared10), nameof(CmdRed10), nameof(CmdOrange10), nameof(CmdYellow10), nameof(CmdGreen10), nameof(CmdBlue10), nameof(CmdPurple10), nameof(CmdPink10), nameof(CmdViolet10), nameof(CmdUltraviolet10), nameof(CmdWhite10),
             nameof(CmdInfrared20), nameof(CmdRed20), nameof(CmdOrange20), nameof(CmdYellow20), nameof(CmdGreen20), nameof(CmdBlue20), nameof(CmdPurple20), nameof(CmdPink20), nameof(CmdViolet20), nameof(CmdUltraviolet20), nameof(CmdWhite20),
             nameof(CmdSourceVoltage033), nameof(CmdSourceVoltage050), nameof(CmdSourceVoltage090), nameof(CmdSourceVoltage120), nameof(CmdSourceVoltage150), nameof(CmdSourceVoltage200), nameof(CmdSourceVoltage240),
+            nameof(CmdR2E24), nameof(CmdR2E48), nameof(CmdR2E96), nameof(CmdR2E192),
         ]);
     }
 

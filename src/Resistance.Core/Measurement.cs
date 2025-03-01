@@ -105,7 +105,7 @@ public struct Measurement : IEquatable<Measurement> {
     /// <summary>
     /// Gets E-series rounding.
     /// </summary>
-    internal NumberSeries Series { get; }
+    internal NumberSeries Series { get; private set; }
 
     /// <summary>
     /// Gets E-series rounding direction.
@@ -115,7 +115,7 @@ public struct Measurement : IEquatable<Measurement> {
     /// <summary>
     /// Gets number of digits things are rounded to.
     /// </summary>
-    internal int DigitCount { get; }
+    internal int DigitCount { get; private set; }
 
     /// <summary>
     /// Gets if SI units are used for output.
@@ -145,6 +145,47 @@ public struct Measurement : IEquatable<Measurement> {
     /// <param name="newValue">New value.</param>
     public void Adjust(decimal? newValue) {
         Value = new Measurement(newValue, DigitCount, UseSI, Series, Rounding, MinValue, MaxValue).Value;
+    }
+
+    /// <summary>
+    /// Adjusts the value and sets appropriate digit count.
+    /// </summary>
+    /// <param name="newValue">New value.</param>
+    internal void AdjustSeriesEx(NumberSeries newSeries) {
+        var newDigitCount = newSeries switch {
+            NumberSeries.None => -3,
+            NumberSeries.E3 => -2,
+            NumberSeries.E6 => -2,
+            NumberSeries.E12 => -2,
+            NumberSeries.E24 => -2,
+            NumberSeries.E48 => -3,
+            NumberSeries.E96 => -3,
+            NumberSeries.E192 => -3,
+            _ => -3,
+        };
+        Series = newSeries;
+        DigitCount = newDigitCount;
+        Value = new Measurement(Value, newDigitCount, UseSI, newSeries, Rounding, MinValue, MaxValue).Value;
+    }
+
+
+    /// <summary>
+    /// Returns text for resistance series.
+    /// </summary>
+    public string SeriesText {
+        get {
+            return Series switch {
+                NumberSeries.None => "exact",
+                NumberSeries.E3 => "E3",
+                NumberSeries.E6 => "E6",
+                NumberSeries.E12 => "E12",
+                NumberSeries.E24 => "E24",
+                NumberSeries.E48 => "E48",
+                NumberSeries.E96 => "E96",
+                NumberSeries.E192 => "E192",
+                _ => "?",
+            };
+        }
     }
 
 

@@ -81,7 +81,7 @@ public class LM117 : Calculator {
 
     private Measurement _R2;
     [Category("~Resistors")]
-    [DisplayName("R2")]
+    [DisplayName("R2 ({SeriesText})")]
     [MeasurementUnit("Ω")]
     public Measurement R2 {
         get { return _R2; }
@@ -177,6 +177,39 @@ public class LM117 : Calculator {
     public void CmdR1() { R1 = 240; }
 
 
+    [Category("Resistance Series")]
+    [DisplayName("E24")]
+    public void CmdR2E24() {
+        _R1.AdjustSeriesEx(NumberSeries.E24);
+        _R2.AdjustSeriesEx(NumberSeries.E24);
+        Update();
+    }
+
+    [Category("Resistance Series")]
+    [DisplayName("E48")]
+    public void CmdR2E48() {
+        _R1.AdjustSeriesEx(NumberSeries.E48);
+        _R2.AdjustSeriesEx(NumberSeries.E48);
+        Update();
+    }
+
+    [Category("Resistance Series")]
+    [DisplayName("E96")]
+    public void CmdR2E96() {
+        _R1.AdjustSeriesEx(NumberSeries.E96);
+        _R2.AdjustSeriesEx(NumberSeries.E96);
+        Update();
+    }
+
+    [Category("Resistance Series")]
+    [DisplayName("E192")]
+    public void CmdR2E192() {
+        _R1.AdjustSeriesEx(NumberSeries.E192);
+        _R2.AdjustSeriesEx(NumberSeries.E192);
+        Update();
+    }
+
+
     #region Elements
 
     /// <inheritdoc/>
@@ -188,6 +221,7 @@ public class LM117 : Calculator {
             nameof(CmdInputVoltage033), nameof(CmdInputVoltage050), nameof(CmdInputVoltage090), nameof(CmdInputVoltage120), nameof(CmdInputVoltage240),
             nameof(CmdOutputVoltage015), nameof(CmdOutputVoltage018), nameof(CmdOutputVoltage025), nameof(CmdOutputVoltage033), nameof(CmdOutputVoltage050),
             nameof(CmdR1),
+            nameof(CmdR2E24), nameof(CmdR2E48), nameof(CmdR2E96), nameof(CmdR2E192),
         ]);
     }
 

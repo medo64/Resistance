@@ -143,7 +143,12 @@ public abstract class Calculator {
         if (propertyInfo is not null) {
             foreach (var attr in propertyInfo.GetCustomAttributes(typeof(DisplayNameAttribute), false)) {
                 if (attr is DisplayNameAttribute displayNameAttr) {
-                    return displayNameAttr.DisplayName;
+                    if (propertyInfo.GetValue(calculator) is Measurement measurement) {
+                        return displayNameAttr.DisplayName
+                            .Replace("{SeriesText}", measurement.SeriesText, StringComparison.InvariantCulture);
+                    } else {
+                        return displayNameAttr.DisplayName;
+                    }
                 }
             }
         }
