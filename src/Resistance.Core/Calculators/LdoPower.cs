@@ -11,7 +11,7 @@ using System.ComponentModel;
 public class LdoPower : Calculator {
 
     public LdoPower()
-        : base("LDO Power", "Calculate power rating for LDO.") {
+        : base("LDO Power") {
 
         _InputVoltage = new Measurement(StoreRead(nameof(InputVoltage), 12), digitCount: 1, useSI: true, minValue: 0, maxValue: null);
         _InputTolerance = new Measurement(StoreRead(nameof(InputTolerance), 5), digitCount: 1, useSI: false, minValue: 0, maxValue: 50);

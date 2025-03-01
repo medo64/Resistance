@@ -11,7 +11,8 @@ using System.ComponentModel;
 public class MicrochipPicTmr0 : Calculator {
 
     public MicrochipPicTmr0()
-        : base("Microchip PIC TMR0", "Calculate Microchip TMR0 settings.") {
+        : base("Microchip PIC TMR0") {
+
         _ClockFrequency = new Measurement(StoreRead(nameof(ClockFrequency), 48000000), digitCount: 1, useSI: true, minValue: 0, maxValue: null);
         _Tmr0Prescaler = new Measurement(StoreRead(nameof(Tmr0Prescaler), 8), digitCount: 1, useSI: false, minValue: 1, maxValue: 256);
         _Tmr0Bits = new Measurement(StoreRead(nameof(Tmr0Bits), 8), digitCount: 1, useSI: true, minValue: 8, maxValue: 8);

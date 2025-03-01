@@ -14,9 +14,8 @@ using Medo.Configuration;
 /// </summary>
 public abstract class Calculator {
 
-    protected Calculator(string name, string description) {
+    protected Calculator(string name) {
         Name = name;
-        Description = description;
     }
 
 
@@ -25,10 +24,6 @@ public abstract class Calculator {
     /// </summary>
     public string Name { get; }
 
-    /// <summary>
-    /// Gets description for the calculator.
-    /// </summary>
-    public string Description { get; }
 
     /// <inheritdoc/>
     public override string ToString() {

@@ -10,7 +10,7 @@ using System.ComponentModel;
 public class ESeries : Calculator {
 
     public ESeries()
-        : base("E-series", "Round to nearest E-series value") {
+        : base("E-series") {
 
         _Value = new Measurement(StoreRead(nameof(Value), 1000), -3, useSI: true, minValue: 0, maxValue: null);
         Value = _Value;  // force update

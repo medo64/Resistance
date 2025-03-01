@@ -10,7 +10,7 @@ using System.ComponentModel;
 public class OhmLaw : Calculator {
 
     public OhmLaw()
-        : base("Ohm's Law", "Calculate voltage, current, or resistance using Ohm's Law.") {
+        : base("Ohm's Law") {
 
         _Voltage = new Measurement(StoreRead(nameof(Voltage), 5), digitCount: -3, useSI: true, minValue: 0, maxValue: null);
         _Current = new Measurement(StoreRead(nameof(Current), 1), digitCount: -3, useSI: true, minValue: 0, maxValue: null);

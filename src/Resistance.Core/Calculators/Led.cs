@@ -12,7 +12,7 @@ using System.Globalization;
 public class Led : Calculator {
 
     public Led()
-        : base("LED", "LED resistor calculator.") {
+        : base("LED") {
 
         _SourceVoltage = new Measurement(StoreRead(nameof(SourceVoltage), 5), digitCount: 3, useSI: true, minValue: 0, maxValue: null);
         _ForwardVoltage = new Measurement(StoreRead(nameof(ForwardVoltage), 1.8), digitCount: 3, useSI: true, minValue: 0, maxValue: null);

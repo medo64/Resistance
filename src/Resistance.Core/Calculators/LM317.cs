@@ -11,7 +11,7 @@ using System.ComponentModel;
 public class LM317 : Calculator {
 
     public LM317()
-        : base("LM317", "Calculate settings for LM317 voltage regulator.") {
+        : base("LM317") {
 
         _InputVoltage = new Measurement(StoreRead(nameof(InputVoltage), 12), digitCount: 3, useSI: true, minValue: 0, maxValue: null);
         _DesiredVoltage = new Measurement(StoreRead(nameof(DesiredVoltage), 5), digitCount: 3, useSI: true, minValue: 0, maxValue: null);

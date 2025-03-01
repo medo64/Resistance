@@ -11,7 +11,7 @@ using System.ComponentModel;
 public class VoltageDivider : Calculator {
 
     public VoltageDivider()
-        : base("Voltage Divider", "Calculate voltage divider resistors.") {
+        : base("Voltage Divider") {
 
         _VRef = new Measurement(StoreRead(nameof(VRef), 2.048m), digitCount: 3, useSI: true, minValue: 0, maxValue: null);
         _VMax = new Measurement(StoreRead(nameof(VMax), 5.5m), digitCount: 3, useSI: true, minValue: 0, maxValue: null);
