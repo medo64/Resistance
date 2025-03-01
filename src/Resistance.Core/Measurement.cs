@@ -532,6 +532,8 @@ public struct Measurement : IEquatable<Measurement> {
             _ => throw new ArgumentOutOfRangeException(nameof(series), "Unrecognized series."),
         };
 
+        if (value == 0) { return 0; }
+
         var valueCoefficient = value;
         int valueExponent = 0;
         if (value < 100) {
