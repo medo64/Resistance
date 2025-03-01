@@ -165,41 +165,80 @@ public class VoltageDivider : Calculator {
     public void CmdVRef5000() { VRef = 5.000m; }
 
 
+
+
     [Category("Maximum Voltage")]
+    [DisplayName("5 V")]
+    public void CmdVMax05() { VMax = 5; }
+
+    [Category("Maximum Voltage")]
+    [DisplayName("9 V")]
+    public void CmdVMax09() { VMax = 9; }
+
+    [Category("Maximum Voltage")]
+    [DisplayName("12 V")]
+    public void CmdVMax12() { VMax = 12; }
+
+    [Category("Maximum Voltage")]
+    [DisplayName("15 V")]
+    public void CmdVMax15() { VMax = 15; }
+
+    [Category("Maximum Voltage")]
+    [DisplayName("24 V")]
+    public void CmdVMax24() { VMax = 24; }
+
+    [Category("Maximum Voltage")]
+    [DisplayName("30 V")]
+    public void CmdVMax30() { VMax = 30; }
+
+    [Category("Maximum Voltage")]
+    [DisplayName("36 V")]
+    public void CmdVMax36() { VMax = 36; }
+
+    [Category("Maximum Voltage")]
+    [DisplayName("48 V")]
+    public void CmdVMax48() { VMax = 48; }
+
+    [Category("Maximum Voltage")]
+    [DisplayName("60 V")]
+    public void CmdVMax60() { VMax = 60; }
+
+
+    [Category("Maximum Voltage (±10%)")]
     [DisplayName("5 V ±10%")]
-    public void CmdVMax05() { VMax = 5 * 1.1m; }
+    public void CmdVMax05P() { VMax = 5 * 1.1m; }
 
-    [Category("Maximum Voltage")]
+    [Category("Maximum Voltage (±10%)")]
     [DisplayName("9 V ±10%")]
-    public void CmdVMax09() { VMax = 9 * 1.1m; }
+    public void CmdVMax09P() { VMax = 9 * 1.1m; }
 
-    [Category("Maximum Voltage")]
+    [Category("Maximum Voltage (±10%)")]
     [DisplayName("12 V ±10%")]
-    public void CmdVMax12() { VMax = 12 * 1.1m; }
+    public void CmdVMax12P() { VMax = 12 * 1.1m; }
 
-    [Category("Maximum Voltage")]
+    [Category("Maximum Voltage (±10%)")]
     [DisplayName("15 V ±10%")]
-    public void CmdVMax15() { VMax = 15 * 1.1m; }
+    public void CmdVMax15P() { VMax = 15 * 1.1m; }
 
-    [Category("Maximum Voltage")]
+    [Category("Maximum Voltage (±10%)")]
     [DisplayName("24 V ±10%")]
-    public void CmdVMax24() { VMax = 24 * 1.1m; }
+    public void CmdVMax24P() { VMax = 24 * 1.1m; }
 
-    [Category("Maximum Voltage")]
+    [Category("Maximum Voltage (±10%)")]
     [DisplayName("30 V ±10%")]
-    public void CmdVMax30() { VMax = 30 * 1.1m; }
+    public void CmdVMax30P() { VMax = 30 * 1.1m; }
 
-    [Category("Maximum Voltage")]
+    [Category("Maximum Voltage (±10%)")]
     [DisplayName("36 V ±10%")]
-    public void CmdVMax36() { VMax = 36 * 1.1m; }
+    public void CmdVMax36P() { VMax = 36 * 1.1m; }
 
-    [Category("Maximum Voltage")]
+    [Category("Maximum Voltage (±10%)")]
     [DisplayName("48 V ±10%")]
-    public void CmdVMax48() { VMax = 48 * 1.1m; }
+    public void CmdVMax48P() { VMax = 48 * 1.1m; }
 
-    [Category("Maximum Voltage")]
+    [Category("Maximum Voltage (±10%)")]
     [DisplayName("60 V ±10%")]
-    public void CmdVMax60() { VMax = 60 * 1.1m; }
+    public void CmdVMax60P() { VMax = 60 * 1.1m; }
 
 
     [Category("ADC Resolution")]
@@ -266,6 +305,7 @@ public class VoltageDivider : Calculator {
             nameof(VRef), nameof(VMax), nameof(Ratio), nameof(R1), nameof(R2), nameof(AdcBits), nameof(AdcSteps), nameof(AdcLsb), nameof(Impedance),
             nameof(CmdVRef1024), nameof(CmdVRef1200), nameof(CmdVRef1250), nameof(CmdVRef2048), nameof(CmdVRef2500), nameof(CmdVRef3300), nameof(CmdVRef4096), nameof(CmdVRef5000),
             nameof(CmdVMax05), nameof(CmdVMax09), nameof(CmdVMax12), nameof(CmdVMax15), nameof(CmdVMax24), nameof(CmdVMax30), nameof(CmdVMax36), nameof(CmdVMax48), nameof(CmdVMax60),
+            nameof(CmdVMax05P), nameof(CmdVMax09P), nameof(CmdVMax12P), nameof(CmdVMax15P), nameof(CmdVMax24P), nameof(CmdVMax30P), nameof(CmdVMax36P), nameof(CmdVMax48P), nameof(CmdVMax60P),
             nameof (CmdAdcBits08), nameof (CmdAdcBits10), nameof (CmdAdcBits12), nameof (CmdAdcBits14), nameof (CmdAdcBits16), nameof (CmdAdcBits18),
             nameof(CmdR21k), nameof(CmdR210k),
         ]);
