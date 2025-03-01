@@ -16,7 +16,7 @@ public class VoltageDivider : Calculator {
         _VRef = new Measurement(StoreRead(nameof(VRef), 2.048m), digitCount: 3, useSI: true, minValue: 0, maxValue: null);
         _VMax = new Measurement(StoreRead(nameof(VMax), 5.5m), digitCount: 3, useSI: true, minValue: 0, maxValue: null);
         _Ratio = new Measurement(null, digitCount: 2, useSI: false);
-        _R1 = new Measurement(StoreRead(nameof(R1), 30000), digitCount: -3, NumberSeries.E192, NumberSeriesRounding.Up, minValue: 0, maxValue: null);
+        _R1 = new Measurement(StoreRead(nameof(R1), 30000), digitCount: -3, NumberSeries.None, NumberSeriesRounding.Up, minValue: 0, maxValue: null);
         _R2 = new Measurement(StoreRead(nameof(R2), 10000), digitCount: -3, NumberSeries.E24, NumberSeriesRounding.Nearest, minValue: 0, maxValue: null);
         _AdcBits = new Measurement(StoreRead(nameof(AdcBits), 12), digitCount: 0, useSI: false, minValue: 4, maxValue: 32);
         _AdcSteps = new Measurement(null, digitCount: 0, useSI: false);
