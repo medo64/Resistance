@@ -335,6 +335,7 @@ public abstract class Calculator {
         new ESeries(),
         new LdoPower(),
         new Led(),
+        new MicrochipPicPwm(),
         new MicrochipPicTmr0(),
         new OhmLaw(),
         new VoltageDivider(),
