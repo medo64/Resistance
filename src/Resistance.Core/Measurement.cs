@@ -188,7 +188,7 @@ public struct Measurement : IEquatable<Measurement> {
                 >= 1_000_000_000m => GetString(provider, number / 1_000_000_000m, 'G', unit),
                 >= 1_000_000m => GetString(provider, number / 1_000_000m, 'M', unit),
                 >= 1000m => GetString(provider, number / 1_000m, 'k', unit),
-                >= 1m => GetString(provider, number, ' ', unit),
+                >= 1m or 0 => GetString(provider, number, ' ', unit),
                 >= 0.001m => GetString(provider, number * 1_000m, 'm', unit),
                 >= 0.000_001m => GetString(provider, number * 1_000_000m, 'μ', unit),
                 >= 0.000_000_001m => GetString(provider, number * 1_000_000_000m, 'n', unit),
