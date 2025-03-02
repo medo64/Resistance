@@ -110,12 +110,30 @@ fi
 if [ "$PACKAGE_LINUX_APPIMAGE" != "" ]; then
     echo "${ANSI_PURPLE}AppImage ............: ${ANSI_MAGENTA}$PACKAGE_LINUX_APPIMAGE${ANSI_RESET}"
 
-    PUBLISH_LINUX_APPIMAGE=$( cat "$SCRIPT_DIR/.meta.private" | grep -E "^PUBLISH_LINUX_APPIMAGE:" | sed  -n 1p | cut -d: -sf2- | xargs )
+    PUBLISH_LINUX_APPIMAGE=$( cat "$SCRIPT_DIR/.meta.private" 2>/dev/null | grep -E "^PUBLISH_LINUX_APPIMAGE:" | sed  -n 1p | cut -d: -sf2- | xargs )
     if [ "$PUBLISH_LINUX_APPIMAGE" = "" ]; then
-        echo "${ANSI_PURPLE}AppImage remote .....: ${ANSI_RED}not found${ANSI_RESET}" >&2
-        exit 113
+        echo "${ANSI_PURPLE}AppImage remote .....: ${ANSI_MAGENTA}(not configured)${ANSI_RESET}" >&2
+    else
+        echo "${ANSI_PURPLE}AppImage remote .....: ${ANSI_MAGENTA}$PUBLISH_LINUX_APPIMAGE${ANSI_RESET}"
     fi
-    echo "${ANSI_PURPLE}AppImage remote .....: ${ANSI_MAGENTA}$PUBLISH_LINUX_APPIMAGE${ANSI_RESET}"
+fi
+
+
+PACKAGE_LINUX_DEB=$( cat "$SCRIPT_DIR/.meta" | grep -E "^PACKAGE_LINUX_DEB:" | sed  -n 1p | cut -d: -sf2- | xargs )
+if [ "$PACKAGE_LINUX_DEB" = "" ]; then  # auto-detect
+    if [ -d "$SCRIPT_DIR/packaging/linux-deb" ]; then
+        PACKAGE_LINUX_DEB=$PROJECT_NAME
+    fi
+fi
+if [ "$PACKAGE_LINUX_DEB" != "" ]; then
+    echo "${ANSI_PURPLE}Debian package ......: ${ANSI_MAGENTA}$PACKAGE_LINUX_DEB${ANSI_RESET}"
+
+    PUBLISH_LINUX_DEB=$( cat "$SCRIPT_DIR/.meta.private" 2>/dev/null | grep -E "^PUBLISH_LINUX_DEB:" | sed  -n 1p | cut -d: -sf2- | xargs )
+    if [ "$PUBLISH_LINUX_DEB" = "" ]; then
+        echo "${ANSI_PURPLE}Debian package remote: ${ANSI_MAGENTA}(not configured)${ANSI_RESET}" >&2
+    else
+        echo "${ANSI_PURPLE}Debian package remote: ${ANSI_MAGENTA}$PUBLISH_LINUX_APPIMAGE${ANSI_RESET}"
+    fi
 fi
 
 
@@ -133,6 +151,7 @@ prereq_package() {
             exit 113
         fi
     fi
+
     if [ "$PACKAGE_LINUX_APPIMAGE" != "" ]; then
         if ! [ -d "$SCRIPT_DIR/packaging/linux-appimage" ]; then
             echo "${ANSI_RED}Missing linux-appimage directory${ANSI_RESET}" >&2
@@ -144,6 +163,41 @@ prereq_package() {
         fi
         if ! command -v appimagetool-x86_64.AppImage >/dev/null; then
             echo "${ANSI_RED}Missing appimagetool-x86_64.AppImage${ANSI_RESET}" >&2
+            exit 113
+        fi
+    fi
+
+    if [ "$PACKAGE_LINUX_DEB" != "" ]; then
+        if ! [ -d "$SCRIPT_DIR/packaging/linux-deb" ]; then
+            echo "${ANSI_RED}Missing linux-deb directory${ANSI_RESET}" >&2
+            exit 113
+        fi
+        if ! [ -e "$SCRIPT_DIR/packaging/linux-deb/usr/share/applications"/*.desktop ]; then
+            echo "${ANSI_RED}Missing desktip file${ANSI_RESET}" >&2
+            exit 113
+        fi
+        if ! [ -e "$SCRIPT_DIR/packaging/linux-deb/usr/share/icons/hicolor/128x128/apps"/*.png ]; then
+            echo "${ANSI_RED}Missing icon files${ANSI_RESET}" >&2
+            exit 113
+        fi
+        if ! command -v dpkg-deb >/dev/null; then
+            echo "${ANSI_RED}Missing dpkg-deb command (dpkg-deb package)${ANSI_RESET}" >&2
+            exit 113
+        fi
+        if ! command -v fakeroot >/dev/null; then
+            echo "${ANSI_RED}Missing fakeroot command${ANSI_RESET}" >&2
+            exit 113
+        fi
+        if ! command -v gzip >/dev/null; then
+            echo "${ANSI_RED}Missing gzip command${ANSI_RESET}" >&2
+            exit 113
+        fi
+        if ! command -v lintian >/dev/null; then
+            echo "${ANSI_RED}Missing lintian command (lintian package)${ANSI_RESET}" >&2
+            exit 113
+        fi
+        if ! command -v strip >/dev/null; then
+            echo "${ANSI_RED}Missing strip command${ANSI_RESET}" >&2
             exit 113
         fi
     fi
@@ -247,6 +301,7 @@ make_package() {
     if [ "$PACKAGE_LINUX_DOCKER" != "" ]; then
         ANYTHING_DONE=1
         echo "${ANSI_MAGENTA}docker${ANSI_RESET}"
+
         if [ "$GIT_VERSION" != "" ]; then
             docker build \
                 -t $PACKAGE_LINUX_DOCKER:$GIT_VERSION \
@@ -271,7 +326,8 @@ make_package() {
 
     if [ "$PACKAGE_LINUX_APPIMAGE" != "" ]; then
         ANYTHING_DONE=1
-        echo "${ANSI_MAGENTA}appimage${ANSI_RESET}"
+        echo "${ANSI_MAGENTA}appimage (linux-x64)${ANSI_RESET}"
+
         if [ "$GIT_VERSION" != "" ]; then
             APPIMAGE_NAME="$PROJECT_NAME-$GIT_VERSION.AppImage"
         else
@@ -292,12 +348,74 @@ make_package() {
         cp "$SCRIPT_DIR/packaging/linux-deb/usr/share/icons/hicolor/128x128/apps"/*.png "$SCRIPT_DIR/build/AppDir/" || exit 113
         cp "$SCRIPT_DIR/packaging/linux-deb/usr/share/icons/hicolor/128x128/apps"/*.png "$SCRIPT_DIR/build/AppDir/.DirIcon" || exit 113
 
+        if [ -e "$SCRIPT_DIR/packaging/linux-deb/etc/" ]; then
+            rsync -a "$SCRIPT_DIR/packaging/linux-deb/etc/" "$SCRIPT_DIR/build/AppDir/etc/" || exit 113
+        fi
+
         mkdir -p "dist"
         rm "dist/$APPIMAGE_NAME" 2>/dev/null
         appimagetool-x86_64.AppImage "$SCRIPT_DIR/build/AppDir/" "dist/$APPIMAGE_NAME" || exit 113
 
         echo "${ANSI_CYAN}dist/$APPIMAGE_NAME${ANSI_RESET}"
         echo
+    fi
+
+    if [ "$PACKAGE_LINUX_DEB" != "" ]; then
+        for RUNTIME in $PROJECT_RUNTIMES; do
+            case $RUNTIME in
+                linux-x64)   DEB_ARCHITECTURE=amd64 ;;
+                linux-arm64) DEB_ARCHITECTURE=arm64 ;;
+                *)           continue ;;
+            esac
+
+            ANYTHING_DONE=1
+            echo "${ANSI_MAGENTA}deb ($RUNTIME: $DEB_ARCHITECTURE)${ANSI_RESET}"
+
+            if [ "$GIT_VERSION" != "" ]; then
+                DEB_VERSION=$GIT_VERSION
+                DEB_PACKAGE_NAME="${PROJECT_NAME}_${GIT_VERSION}_${DEB_ARCHITECTURE}.deb"
+            else
+                DEB_VERSION=0.0.0
+                DEB_PACKAGE_NAME="${PROJECT_NAME}_0.0.0+${GIT_HASH}_${DEB_ARCHITECTURE}.deb"
+            fi
+
+            mkdir -p "$SCRIPT_DIR/build/$DEB_PACKAGE_NAME"
+            find "$SCRIPT_DIR/build/$DEB_PACKAGE_NAME/" -mindepth 1 -delete
+
+            rsync -a "$SCRIPT_DIR/packaging/linux-deb/DEBIAN/" "$SCRIPT_DIR/build/$DEB_PACKAGE_NAME/DEBIAN/" || exit 113
+            sed -i "s/<DEB_VERSION>/$DEB_VERSION/" "$SCRIPT_DIR/build/$DEB_PACKAGE_NAME/DEBIAN/control" || exit 113
+            sed -i "s/<DEB_ARCHITECTURE>/amd64/" "$SCRIPT_DIR/build/$DEB_PACKAGE_NAME/DEBIAN/control" || exit 113
+
+            rsync -a "$SCRIPT_DIR/packaging/linux-deb/usr/" "$SCRIPT_DIR/build/$DEB_PACKAGE_NAME/usr/" || exit 113
+
+            mkdir -p  "$SCRIPT_DIR/build/$DEB_PACKAGE_NAME/opt/$PROJECT_NAME/"
+            rsync -a "$SCRIPT_DIR/bin/linux-x64/" "$SCRIPT_DIR/build/$DEB_PACKAGE_NAME/opt/$PROJECT_NAME/" || exit 113
+
+            if [ -e "$SCRIPT_DIR/packaging/linux-deb/copyright" ]; then
+                mkdir -p "$SCRIPT_DIR/build/$DEB_PACKAGE_NAME/usr/share/doc/$PROJECT_NAME/"
+                cp "$SCRIPT_DIR/packaging/linux-deb/copyright" "$SCRIPT_DIR/build/$DEB_PACKAGE_NAME/usr/share/doc/$PROJECT_NAME/copyright" || exit 113
+            fi
+
+            find "$SCRIPT_DIR/build/$DEB_PACKAGE_NAME/" -type d -exec chmod 755 {} + || exit 113
+            find "$SCRIPT_DIR/build/$DEB_PACKAGE_NAME/" -type f -exec chmod 644 {} + || exit 113
+            find "$SCRIPT_DIR/build/$DEB_PACKAGE_NAME/opt/" -type f -name "$PROJECT_NAME" -exec chmod 755 {} + || exit 113
+            chmod 755 "$SCRIPT_DIR/build/$DEB_PACKAGE_NAME/DEBIAN"/config || exit 113
+            chmod 755 "$SCRIPT_DIR/build/$DEB_PACKAGE_NAME/DEBIAN"/p*inst || exit 113
+            chmod 755 "$SCRIPT_DIR/build/$DEB_PACKAGE_NAME/DEBIAN"/p*rm || exit 113
+
+            fakeroot dpkg-deb -Z gzip --build "$SCRIPT_DIR/build/$DEB_PACKAGE_NAME/" > /dev/null || exit 113
+            mv "$SCRIPT_DIR/build/$DEB_PACKAGE_NAME.deb" "dist/$DEB_PACKAGE_NAME.deb" || exit 113
+            lintian --suppress-tags dir-or-file-in-opt,embedded-library "dist/$DEB_PACKAGE_NAME.deb"
+
+            case $RUNTIME in
+                linux-x64)   DEB_PACKAGE_AMD64=$DEB_PACKAGE_NAME.deb ;;
+                linux-arm64) DEB_PACKAGE_ARM64=$DEB_PACKAGE_NAME.deb ;;
+                *)           continue ;;
+            esac
+
+            echo "${ANSI_CYAN}dist/$DEB_PACKAGE_NAME.deb${ANSI_RESET}"
+            echo
+        done
     fi
 
     if [ "$ANYTHING_DONE" -eq 0 ]; then
@@ -318,6 +436,7 @@ make_publish() {
     if [ "$PUBLISH_LINUX_DOCKER" != "" ]; then
         ANYTHING_DONE=1
         echo "${ANSI_MAGENTA}docker${ANSI_RESET}"
+
         if [ "$GIT_VERSION" != "" ]; then
             docker tag \
                 $PACKAGE_LINUX_DOCKER:$GIT_VERSION \
@@ -347,10 +466,29 @@ make_publish() {
 
     if [ "$PUBLISH_LINUX_APPIMAGE" != "" ]; then
         ANYTHING_DONE=1
-        echo "${ANSI_MAGENTA}appimage${ANSI_RESET}"
+        echo "${ANSI_MAGENTA}appimage (linux-x64)${ANSI_RESET}"
         rsync --no-g --no-o --progress "dist/$APPIMAGE_NAME" $PUBLISH_LINUX_APPIMAGE || exit 113
         echo "${ANSI_CYAN}$PUBLISH_LINUX_APPIMAGE${ANSI_RESET}"
         echo
+    fi
+
+    if [ "$PUBLISH_LINUX_DEB" != "" ]; then
+        for RUNTIME in $PROJECT_RUNTIMES; do
+            case $RUNTIME in
+                linux-x64)   DEB_ARCHITECTURE=amd64 ; DEB_PACKAGE_CURR=$DEB_PACKAGE_AMD64 ;;
+                linux-arm64) DEB_ARCHITECTURE=arm64 ; DEB_PACKAGE_CURR=$DEB_PACKAGE_ARM64 ;;
+                *)           continue ;;
+            esac
+
+            ANYTHING_DONE=1
+            echo "${ANSI_MAGENTA}deb ($RUNTIME: $DEB_ARCHITECTURE)${ANSI_RESET}"
+
+            PUBLISH_LINUX_DEB_CURR="$( echo "$PUBLISH_LINUX_DEB" | sed "s/<DEB_ARCHITECTURE>/$DEB_ARCHITECTURE/g" )"
+
+            rsync --no-g --no-o --progress "dist/$DEB_PACKAGE_CURR" $PUBLISH_LINUX_DEB_CURR || exit 113
+            echo "${ANSI_CYAN}$PUBLISH_LINUX_DEB_CURR${ANSI_RESET}"
+            echo
+        done
     fi
 
     if [ "$ANYTHING_DONE" -eq 0 ]; then

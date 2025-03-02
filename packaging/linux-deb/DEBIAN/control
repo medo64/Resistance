@@ -1,0 +1,10 @@
+Package:        resistance
+Version:        <DEB_VERSION>
+Architecture:   <DEB_ARCHITECTURE>
+Maintainer:     Josip Medved <jmedved@jmedved.com>
+Homepage:       https://www.medo64.com/resistance/
+Description:    Simple electronics calculator
+ A simple electronics calculator focused on resistance value calculations.
+Section:        utils
+Priority:       optional
+Depends:        debconf, gnupg2, libc6
