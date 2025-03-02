@@ -38,15 +38,26 @@ if [ "$PROJECT_NAME" = "" ]; then
 fi
 echo "${ANSI_PURPLE}Project name ........: ${ANSI_MAGENTA}$PROJECT_NAME${ANSI_RESET}"
 
-GIT_VERSION=$( git tag --points-at HEAD | grep --color=always -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sed -n 1p | sed 's/^v//g' | xargs )
+GIT_VERSION=$( git tag --points-at HEAD | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sed -n 1p | sed 's/^v//g' | xargs )
 GIT_INDEX=$( git rev-list --count HEAD )
 GIT_HASH=$( git log -n 1 --format=%h )
+
+if [ "$GIT_VERSION" != "" ]; then
+    if [ "$HAS_CHANGES" -eq 0 ]; then
+        GIT_VERSION_TEXT="$GIT_VERSION"
+    else
+        GIT_VERSION_TEXT="$GIT_VERSION+$GIT_HASH"
+    fi
+else
+    GIT_VERSION_TEXT="0.0.0+$GIT_HASH"
+fi
 
 if [ "$GIT_VERSION" != "" ]; then
     echo "${ANSI_PURPLE}Git tag version .....: ${ANSI_MAGENTA}$GIT_VERSION${ANSI_RESET}"
 else
     echo "${ANSI_PURPLE}Git tag version .....: ${ANSI_MAGENTA}-${ANSI_RESET}"
 fi
+echo "${ANSI_PURPLE}Git tag version text : ${ANSI_MAGENTA}$GIT_VERSION_TEXT${ANSI_RESET}"
 echo "${ANSI_PURPLE}Git revision ........: ${ANSI_MAGENTA}$GIT_HASH${ANSI_PURPLE} (${ANSI_MAGENTA}$GIT_INDEX${ANSI_PURPLE})${ANSI_RESET}"
 
 PROJECT_ENTRYPOINT=$( cat "$SCRIPT_DIR/.meta" | grep -E "^PROJECT_ENTRYPOINT:" | sed  -n 1p | cut -d: -sf2- | xargs )
@@ -325,39 +336,49 @@ make_package() {
     fi
 
     if [ "$PACKAGE_LINUX_APPIMAGE" != "" ]; then
-        ANYTHING_DONE=1
-        echo "${ANSI_MAGENTA}appimage (linux-x64)${ANSI_RESET}"
+        for RUNTIME in $PROJECT_RUNTIMES; do
+            case $RUNTIME in
+                linux-x64)   APPIMAGE_ARCHITECTURE=x86_64 ;;
+                linux-arm64) APPIMAGE_ARCHITECTURE=arm_aarch64 ;;
+                *)           continue ;;
+            esac
 
-        if [ "$GIT_VERSION" != "" ]; then
-            APPIMAGE_NAME="$PROJECT_NAME-$GIT_VERSION.AppImage"
-        else
-            APPIMAGE_NAME="$PROJECT_NAME-0.0.0+$GIT_HASH.AppImage"
-        fi
+            ANYTHING_DONE=1
+            echo "${ANSI_MAGENTA}appimage ($RUNTIME: $APPIMAGE_ARCHITECTURE)${ANSI_RESET}"
 
-        mkdir -p "$SCRIPT_DIR/build/AppDir"
-        find "$SCRIPT_DIR/build/AppDir" -mindepth 1 -delete
+            APPIMAGE_NAME_CURR="$PROJECT_NAME-$GIT_VERSION_TEXT-$APPIMAGE_ARCHITECTURE.AppImage"
 
-        cp "$SCRIPT_DIR/packaging/linux-appimage/AppRun" "$SCRIPT_DIR/build/AppDir/" || exit 113
+            mkdir -p "$SCRIPT_DIR/build/AppImage-$RUNTIME"
+            find "$SCRIPT_DIR/build/AppImage-$RUNTIME" -mindepth 1 -delete
 
-        mkdir -p "$SCRIPT_DIR/build/AppDir/opt/$PROJECT_NAME"
-        rsync -a "$SCRIPT_DIR/bin/linux-x64/" "$SCRIPT_DIR/build/AppDir/opt/$PROJECT_NAME/" || exit 113
+            cp "$SCRIPT_DIR/packaging/linux-appimage/AppRun" "$SCRIPT_DIR/build/AppImage-$RUNTIME/" || exit 113
 
-        rsync -a "$SCRIPT_DIR/packaging/linux-deb/usr/" "$SCRIPT_DIR/build/AppDir/usr/" || exit 113
+            mkdir -p "$SCRIPT_DIR/build/AppImage-$RUNTIME/opt/$PROJECT_NAME"
+            rsync -a "$SCRIPT_DIR/bin/linux-x64/" "$SCRIPT_DIR/build/AppImage-$RUNTIME/opt/$PROJECT_NAME/" || exit 113
 
-        cp "$SCRIPT_DIR/packaging/linux-deb/usr/share/applications"/*.desktop "$SCRIPT_DIR/build/AppDir/" || exit 113
-        cp "$SCRIPT_DIR/packaging/linux-deb/usr/share/icons/hicolor/128x128/apps"/*.png "$SCRIPT_DIR/build/AppDir/" || exit 113
-        cp "$SCRIPT_DIR/packaging/linux-deb/usr/share/icons/hicolor/128x128/apps"/*.png "$SCRIPT_DIR/build/AppDir/.DirIcon" || exit 113
+            rsync -a "$SCRIPT_DIR/packaging/linux-deb/usr/" "$SCRIPT_DIR/build/AppImage-$RUNTIME/usr/" || exit 113
 
-        if [ -e "$SCRIPT_DIR/packaging/linux-deb/etc/" ]; then
-            rsync -a "$SCRIPT_DIR/packaging/linux-deb/etc/" "$SCRIPT_DIR/build/AppDir/etc/" || exit 113
-        fi
+            cp "$SCRIPT_DIR/packaging/linux-deb/usr/share/applications"/*.desktop "$SCRIPT_DIR/build/AppImage-$RUNTIME/" || exit 113
+            cp "$SCRIPT_DIR/packaging/linux-deb/usr/share/icons/hicolor/128x128/apps"/*.png "$SCRIPT_DIR/build/AppImage-$RUNTIME/" || exit 113
+            cp "$SCRIPT_DIR/packaging/linux-deb/usr/share/icons/hicolor/128x128/apps"/*.png "$SCRIPT_DIR/build/AppImage-$RUNTIME/.DirIcon" || exit 113
 
-        mkdir -p "dist"
-        rm "dist/$APPIMAGE_NAME" 2>/dev/null
-        appimagetool-x86_64.AppImage "$SCRIPT_DIR/build/AppDir/" "dist/$APPIMAGE_NAME" || exit 113
+            if [ -e "$SCRIPT_DIR/packaging/linux-deb/etc/" ]; then
+                rsync -a "$SCRIPT_DIR/packaging/linux-deb/etc/" "$SCRIPT_DIR/build/AppImage-$RUNTIME/etc/" || exit 113
+            fi
 
-        echo "${ANSI_CYAN}dist/$APPIMAGE_NAME${ANSI_RESET}"
-        echo
+            mkdir -p "dist"
+            rm "dist/$APPIMAGE_NAME_CURR" 2>/dev/null
+            ARCH=$APPIMAGE_ARCHITECTURE appimagetool-x86_64.AppImage "$SCRIPT_DIR/build/AppImage-$RUNTIME/" "dist/$APPIMAGE_NAME_CURR" || exit 113
+
+            case $RUNTIME in
+                linux-x64)   APPIMAGE_NAME_AMD64=$APPIMAGE_NAME_CURR ;;
+                linux-arm64) APPIMAGE_NAME_ARM64=$APPIMAGE_NAME_CURR ;;
+                *)           continue ;;
+            esac
+
+            echo "${ANSI_CYAN}dist/$APPIMAGE_NAME_CURR${ANSI_RESET}"
+            echo
+        done
     fi
 
     if [ "$PACKAGE_LINUX_DEB" != "" ]; then
@@ -373,10 +394,10 @@ make_package() {
 
             if [ "$GIT_VERSION" != "" ]; then
                 DEB_VERSION=$GIT_VERSION
-                DEB_PACKAGE_NAME="${PROJECT_NAME}_${GIT_VERSION}_${DEB_ARCHITECTURE}.deb"
+                DEB_PACKAGE_NAME="${PROJECT_NAME}_${GIT_VERSION_TEXT}_${DEB_ARCHITECTURE}"
             else
                 DEB_VERSION=0.0.0
-                DEB_PACKAGE_NAME="${PROJECT_NAME}_0.0.0+${GIT_HASH}_${DEB_ARCHITECTURE}.deb"
+                DEB_PACKAGE_NAME="${PROJECT_NAME}_${GIT_VERSION_TEXT}_${DEB_ARCHITECTURE}"
             fi
 
             mkdir -p "$SCRIPT_DIR/build/$DEB_PACKAGE_NAME"
@@ -465,11 +486,20 @@ make_publish() {
     fi
 
     if [ "$PUBLISH_LINUX_APPIMAGE" != "" ]; then
-        ANYTHING_DONE=1
-        echo "${ANSI_MAGENTA}appimage (linux-x64)${ANSI_RESET}"
-        rsync --no-g --no-o --progress "dist/$APPIMAGE_NAME" $PUBLISH_LINUX_APPIMAGE || exit 113
-        echo "${ANSI_CYAN}$PUBLISH_LINUX_APPIMAGE${ANSI_RESET}"
-        echo
+        for RUNTIME in $PROJECT_RUNTIMES; do
+            case $RUNTIME in
+                linux-x64)   APPIMAGE_NAME_CURR=$APPIMAGE_NAME_AMD64 ;;
+                linux-arm64) APPIMAGE_NAME_CURR=$APPIMAGE_NAME_ARM64 ;;
+                *)           continue ;;
+            esac
+
+            ANYTHING_DONE=1
+            echo "${ANSI_MAGENTA}appimage (linux-x64)${ANSI_RESET}"
+
+            rsync --no-g --no-o --progress "dist/$APPIMAGE_NAME_CURR" $PUBLISH_LINUX_APPIMAGE || exit 113
+            echo "${ANSI_CYAN}$PUBLISH_LINUX_APPIMAGE${ANSI_RESET}"
+            echo
+        done
     fi
 
     if [ "$PUBLISH_LINUX_DEB" != "" ]; then

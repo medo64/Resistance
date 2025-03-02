@@ -1,3 +1,3 @@
 PROJECT_NAME:           resistance
 PROJECT_ENTRYPOINT:     src/Resistance.Gui/Resistance.Gui.csproj
-PROJECT_RUNTIMES:       current linux-x64 linux-musl-x64 win-x64
+PROJECT_RUNTIMES:       current linux-x64 linux-musl-x64 linux-arm64 win-x64
