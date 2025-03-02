@@ -223,6 +223,7 @@ make_clean() {
     mkdir -p "$SCRIPT_DIR/bin"
     find "$SCRIPT_DIR/bin" -mindepth 1 -delete
     find "$SCRIPT_DIR/src" -type d -name "bin" -exec rm -rf {} +
+    find "$SCRIPT_DIR/build" -mindepth 1 -delete 2>/dev/null
 }
 
 make_run() {
@@ -339,7 +340,7 @@ make_package() {
         for RUNTIME in $PROJECT_RUNTIMES; do
             case $RUNTIME in
                 linux-x64)   APPIMAGE_ARCHITECTURE=x86_64 ;;
-                linux-arm64) APPIMAGE_ARCHITECTURE=arm_aarch64 ;;
+                linux-arm64) APPIMAGE_ARCHITECTURE=aarch64 ;;
                 *)           continue ;;
             esac
 
@@ -494,7 +495,7 @@ make_publish() {
             esac
 
             ANYTHING_DONE=1
-            echo "${ANSI_MAGENTA}appimage (linux-x64)${ANSI_RESET}"
+            echo "${ANSI_MAGENTA}appimage ($RUNTIME)${ANSI_RESET}"
 
             rsync --no-g --no-o --progress "dist/$APPIMAGE_NAME_CURR" $PUBLISH_LINUX_APPIMAGE || exit 113
             echo "${ANSI_CYAN}$PUBLISH_LINUX_APPIMAGE${ANSI_RESET}"
