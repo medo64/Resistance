@@ -497,7 +497,7 @@ make_publish() {
             ANYTHING_DONE=1
             echo "${ANSI_MAGENTA}appimage ($RUNTIME)${ANSI_RESET}"
 
-            rsync --no-g --no-o --progress "dist/$APPIMAGE_NAME_CURR" $PUBLISH_LINUX_APPIMAGE || exit 113
+            rsync --no-g --no-o --progress --chmod=D755,F644  "dist/$APPIMAGE_NAME_CURR" $PUBLISH_LINUX_APPIMAGE || exit 113
             echo "${ANSI_CYAN}$PUBLISH_LINUX_APPIMAGE${ANSI_RESET}"
             echo
         done
