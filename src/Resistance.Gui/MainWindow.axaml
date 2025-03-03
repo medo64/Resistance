@@ -22,13 +22,15 @@
 
         <ListBox Grid.Column="0" Name="lsbCalculators" SelectionChanged="lsbCalculators_SelectionChanged"></ListBox>
         <GridSplitter Grid.Column="1" ResizeDirection="Columns" />
-        <Border Grid.Column="2" Padding="4">
-            <DockPanel>
-                <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" Name="pnlGroupsPrimary" />
-                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Name="pnlGroupsSecondary" />
-                <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Name="pnlOther" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="16" />
-            </DockPanel>
-        </Border>
+        <ScrollViewer Grid.Column="2" HorizontalScrollBarVisibility="Auto">
+            <Border Padding="4">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" Name="pnlGroupsPrimary" />
+                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Name="pnlGroupsSecondary" />
+                    <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Name="pnlOther" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="16" />
+                </DockPanel>
+            </Border>
+        </ScrollViewer>
     </Grid>
 
 </Window>
