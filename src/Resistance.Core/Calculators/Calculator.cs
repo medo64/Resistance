@@ -345,7 +345,7 @@ public abstract class Calculator {
         new MicrochipPicPwm(),
         new MicrochipPicTmr0(),
         new OhmLaw(),
-        new ParallelAndSeriesResistors(),
+        new ParallelAndSeries(),
         new VoltageDivider(),
     ]);
 
