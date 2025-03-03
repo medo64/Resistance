@@ -342,6 +342,7 @@ public abstract class Calculator {
         new Led(),
         new LM117(),
         new LM317(),
+        new MCP16301(),
         new MicrochipPicPwm(),
         new MicrochipPicTmr0(),
         new OhmLaw(),
