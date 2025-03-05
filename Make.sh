@@ -12,8 +12,6 @@ if [ -t 1 ]; then
     ANSI_CYAN="`[ $(tput colors) -ge 16 ] && tput setaf 14 || tput setaf 6 bold`"
 fi
 
-if [ "$1" = "" ]; then ACTIONS="release"; else ACTIONS="$@"; fi
-
 
 if ! [ -e "$SCRIPT_DIR/.meta" ]; then
     echo "${ANSI_RED}Meta file not found${ANSI_RESET}" >&2
@@ -61,10 +59,22 @@ echo "${ANSI_PURPLE}Git tag version text : ${ANSI_MAGENTA}$GIT_VERSION_TEXT${ANS
 echo "${ANSI_PURPLE}Git revision ........: ${ANSI_MAGENTA}$GIT_HASH${ANSI_PURPLE} (${ANSI_MAGENTA}$GIT_INDEX${ANSI_PURPLE})${ANSI_RESET}"
 
 PROJECT_ENTRYPOINT=$( cat "$SCRIPT_DIR/.meta" | grep -E "^PROJECT_ENTRYPOINT:" | sed  -n 1p | cut -d: -sf2- | xargs )
-if [ -e "$SCRIPT_DIR/$PROJECT_ENTRYPOINT" ]; then
+if [ "$PROJECT_ENTRYPOINT" = "" ]; then  # auto-detect
+    PROJECT_ENTRYPOINT=$( find "$SCRIPT_DIR/src" -type f -name "*.csproj" -print | sed -n 1p )
+    PROJECT_ENTRYPOINT=$( echo "$PROJECT_ENTRYPOINT" | sed "s|$SCRIPT_DIR/||g" )
+fi
+if [ "$PROJECT_ENTRYPOINT" != "" ] && [ -e "$SCRIPT_DIR/$PROJECT_ENTRYPOINT" ]; then
     echo "${ANSI_PURPLE}Project entry point .: ${ANSI_MAGENTA}$PROJECT_ENTRYPOINT${ANSI_RESET}"
 else
     echo "${ANSI_PURPLE}Project entry point .: ${ANSI_RED}not found${ANSI_RESET}" >&2
+    exit 113
+fi
+
+PROJECT_OUTPUTTYPE=$( cat "$SCRIPT_DIR/$PROJECT_ENTRYPOINT" | grep -E "<OutputType>" | sed -n 1p | sed -E "s|.*<OutputType>(.*)</OutputType>.*|\1|g" | xargs | tr '[:upper:]' '[:lower:]' )
+if [ "$PROJECT_OUTPUTTYPE" != "" ]; then
+    echo "${ANSI_PURPLE}Project output type .: ${ANSI_MAGENTA}$PROJECT_OUTPUTTYPE${ANSI_RESET}"
+else
+    echo "${ANSI_PURPLE}Project output type .: ${ANSI_RED}cannot determine${ANSI_RESET}" >&2
     exit 113
 fi
 
@@ -219,11 +229,17 @@ make_clean() {
     echo "${ANSI_MAGENTA}┏━━━━━━━┓${ANSI_RESET}"
     echo "${ANSI_MAGENTA}┃ CLEAN ┃${ANSI_RESET}"
     echo "${ANSI_MAGENTA}┗━━━━━━━┛${ANSI_RESET}"
+    echo
 
-    mkdir -p "$SCRIPT_DIR/bin"
-    find "$SCRIPT_DIR/bin" -mindepth 1 -delete
-    find "$SCRIPT_DIR/src" -type d -name "bin" -exec rm -rf {} +
-    find "$SCRIPT_DIR/build" -mindepth 1 -delete 2>/dev/null
+    find "$SCRIPT_DIR/bin" -mindepth 1 -delete 2>/dev/null || true
+    find "$SCRIPT_DIR/build" -mindepth 1 -delete 2>/dev/null || true
+    rmdir "$SCRIPT_DIR/bin" 2>/dev/null || true
+    rmdir "$SCRIPT_DIR/build" 2>/dev/null || true
+
+    find "$SCRIPT_DIR/src" -type d \( -name "bin" -name "obj" \) -exec rm -rf "{}" + 2>/dev/null || true
+    find "$SCRIPT_DIR/tests" -type d \( -name "bin" -name "obj" \) -exec rm -rf "{}" + 2>/dev/null || true
+    find "$SCRIPT_DIR/tests" -type d -name "BenchmarkDotNet.Artifacts" -exec rm -rf "{}" + 2>/dev/null || true
+    find "$SCRIPT_DIR/examples" -type d \( -name "bin" -name "obj" \) -exec rm -rf "{}" + 2>/dev/null || true
 }
 
 make_run() {
@@ -233,7 +249,13 @@ make_run() {
     echo "${ANSI_MAGENTA}┗━━━━━┛${ANSI_RESET}"
     echo
 
-    dotnet run --project "$SCRIPT_DIR/$PROJECT_ENTRYPOINT"
+    echo "${ANSI_MAGENTA}$(basename $PROJECT_ENTRYPOINT)${ANSI_RESET}"
+    if [ "$PROJECT_OUTPUTTYPE" = "exe" ] || [ "$PROJECT_OUTPUTTYPE" = "winexe" ]; then
+        dotnet run --project "$SCRIPT_DIR/$PROJECT_ENTRYPOINT"
+    else
+        echo "${ANSI_RED}Nothing to run${ANSI_RESET}" >&2
+        exit 113
+    fi
 }
 
 make_test() {
@@ -243,10 +265,76 @@ make_test() {
     echo "${ANSI_MAGENTA}┗━━━━━━┛${ANSI_RESET}"
     echo
 
-    find "$SCRIPT_DIR/tests" -name "*.csproj" -print0 \
-        | xargs -0 -I{} \
-        dotnet test -l  "console;verbosity=detailed" {}
+    ANYTHING_DONE=0
+
+    for PROJECT_FILE in $(find "$SCRIPT_DIR/tests" -name "*.csproj"); do
+        IS_TEST=$(cat "$PROJECT_FILE" | grep -E "MSTest.Sdk" | wc -l)
+        if [ $IS_TEST -eq 0 ]; then continue; fi
+
+        ANYTHING_DONE=1
+        echo "${ANSI_MAGENTA}$(basename $PROJECT_FILE)${ANSI_RESET}"
+
+        dotnet test -l  "console;verbosity=detailed" "$PROJECT_FILE" || exit 113
+        echo
+    done
+
+    if [ "$ANYTHING_DONE" -eq 0 ]; then
+        echo "${ANSI_RED}No test project found${ANSI_RESET}" >&2
+        exit 113
+    fi
+}
+
+make_benchmark() {
     echo
+    echo "${ANSI_MAGENTA}┏━━━━━━━━━━━┓${ANSI_RESET}"
+    echo "${ANSI_MAGENTA}┃ BENCHMARK ┃${ANSI_RESET}"
+    echo "${ANSI_MAGENTA}┗━━━━━━━━━━━┛${ANSI_RESET}"
+    echo
+
+    ANYTHING_DONE=0
+
+    for PROJECT_FILE in $(find "$SCRIPT_DIR/tests" -name "*.csproj"); do
+        IS_BENCHMARK=$(cat "$PROJECT_FILE" | grep -E "BenchmarkDotNet" | wc -l)
+        if [ $IS_BENCHMARK -eq 0 ]; then continue; fi
+
+        ANYTHING_DONE=1
+        echo "${ANSI_MAGENTA}$(basename $PROJECT_FILE)${ANSI_RESET}"
+
+        cd "$( dirname "$PROJECT_FILE" )"
+        dotnet run --configuration "Release" --project "$PROJECT_FILE" || exit 113
+        cd "$SCRIPT_DIR"
+        echo
+    done
+
+    if [ "$ANYTHING_DONE" -eq 0 ]; then
+        echo "${ANSI_RED}No benchmark project found${ANSI_RESET}" >&2
+        exit 113
+    fi
+}
+
+make_examples() {
+    echo
+    echo "${ANSI_MAGENTA}┏━━━━━━━━━━┓${ANSI_RESET}"
+    echo "${ANSI_MAGENTA}┃ EXAMPLES ┃${ANSI_RESET}"
+    echo "${ANSI_MAGENTA}┗━━━━━━━━━━┛${ANSI_RESET}"
+    echo
+
+    ANYTHING_DONE=0
+
+    for PROJECT_FILE in $(find "$SCRIPT_DIR/examples" -name "*.csproj"); do
+        ANYTHING_DONE=1
+
+        echo "${ANSI_MAGENTA}$(basename $PROJECT_FILE) ($(basename $(dirname $PROJECT_FILE)))${ANSI_RESET}"
+
+        mkdir -p "$SCRIPT_DIR/bin/examples/$EXAMPLE_PROJECT_DIR"
+        dotnet build "$PROJECT_FILE" --configuration Release --output "$SCRIPT_DIR/bin/examples/$EXAMPLE_PROJECT_DIR"
+        echo
+    done
+
+    if [ "$ANYTHING_DONE" -eq 0 ]; then
+        echo "${ANSI_RED}No example project found${ANSI_RESET}" >&2
+        exit 113
+    fi
 }
 
 make_debug() {
@@ -255,6 +343,8 @@ make_debug() {
     echo "${ANSI_MAGENTA}┃ DEBUG ┃${ANSI_RESET}"
     echo "${ANSI_MAGENTA}┗━━━━━━━┛${ANSI_RESET}"
     echo
+
+    echo "${ANSI_MAGENTA}$(basename $PROJECT_ENTRYPOINT)${ANSI_RESET}"
 
     mkdir -p "$SCRIPT_DIR/bin"
     dotnet build "$SCRIPT_DIR/$PROJECT_ENTRYPOINT" --configuration Debug --output "$SCRIPT_DIR/bin"
@@ -275,29 +365,32 @@ make_release() {
 
     mkdir -p "$SCRIPT_DIR/bin"
     for RUNTIME in $PROJECT_RUNTIMES; do
-        echo "${ANSI_MAGENTA}$RUNTIME${ANSI_RESET}"
-        if [ "$RUNTIME" = "current" ]; then
-            dotnet publish "$SCRIPT_DIR/$PROJECT_ENTRYPOINT"                          \
-                --configuration Release --output "$SCRIPT_DIR/bin"                    \
-                --self-contained true --use-current-runtime                           \
-                -p:GenerateDocumentationFile=false                                    \
-                -p:AssemblyVersion=$ASSEMBLY_VERSION -p:FileVersion=$ASSEMBLY_VERSION \
-                -p:Version=$ASSEMBLY_VERSION+$GIT_HASH                                \
-                -p:PublishReadyToRun=true -p:PublishSingleFile=true                   \
-            && echo "${ANSI_CYAN}$SCRIPT_DIR/bin${ANSI_RESET}"
-            echo
+        echo "${ANSI_MAGENTA}$(basename $PROJECT_ENTRYPOINT) ($RUNTIME)${ANSI_RESET}"
+
+        PUBLISH_EXTRA_ARGS=
+        if [ "$PROJECT_OUTPUTTYPE" = "exe" ] || [ "$PROJECT_OUTPUTTYPE" = "winexe" ]; then
+            PUBLISH_EXTRA_ARGS="$PUBLISH_EXTRA_ARGS --self-contained true -p:PublishSingleFile=true -p:PublishReadyToRun=true"
+        elif [ "$PROJECT_OUTPUTTYPE" = "library" ]; then  # libraries cannot be published as a single file
+            PUBLISH_EXTRA_ARGS="$PUBLISH_EXTRA_ARGS --self-contained false -p:PublishSingleFile=false -p:GenerateDocumentationFile=true"
         else
-            mkdir -p "$SCRIPT_DIR/bin/$RUNTIME"
-            dotnet publish "$SCRIPT_DIR/$PROJECT_ENTRYPOINT"                          \
-                --configuration Release --output "$SCRIPT_DIR/bin/$RUNTIME"           \
-                --self-contained true --runtime $RUNTIME                              \
-                -p:GenerateDocumentationFile=false                                    \
-                -p:AssemblyVersion=$ASSEMBLY_VERSION -p:FileVersion=$ASSEMBLY_VERSION \
-                -p:Version=$ASSEMBLY_VERSION+$GIT_HASH                                \
-                -p:PublishReadyToRun=true -p:PublishSingleFile=true                   \
-            && echo "${ANSI_CYAN}$SCRIPT_DIR/bin/$RUNTIME${ANSI_RESET}"
-            echo
+            echo "${ANSI_RED}Cannot compile project type'$PROJECT_OUTPUTTYPE'${ANSI_RESET}" >&2
+            exit 113
         fi
+        if [ "$RUNTIME" = "current" ]; then
+            PUBLISH_EXTRA_ARGS="$PUBLISH_EXTRA_ARGS --use-current-runtime"
+            PUBLISH_OUTPUT_DIR="$SCRIPT_DIR/bin"
+        else
+            PUBLISH_EXTRA_ARGS="$PUBLISH_EXTRA_ARGS --runtime $RUNTIME"
+            PUBLISH_OUTPUT_DIR="$SCRIPT_DIR/bin/$RUNTIME"
+        fi
+
+        dotnet publish "$SCRIPT_DIR/$PROJECT_ENTRYPOINT"                          \
+            --configuration Release                                               \
+            -p:AssemblyVersion=$ASSEMBLY_VERSION -p:FileVersion=$ASSEMBLY_VERSION \
+            -p:Version=$ASSEMBLY_VERSION+$GIT_HASH                                \
+            $PUBLISH_EXTRA_ARGS --output "$PUBLISH_OUTPUT_DIR"                    \
+        && echo "${ANSI_CYAN}$SCRIPT_DIR/bin${ANSI_RESET}"
+        echo
     done
 }
 
@@ -529,17 +622,45 @@ make_publish() {
 }
 
 
+if [ "$1" = "" ]; then ACTIONS="release"; else ACTIONS="$@"; fi
+
+TOKENS=
+PREREQ_COMPILE=0
+PREREQ_PACKAGE=0
 for ACTION in $ACTIONS; do
     case $ACTION in
-        clean)                                       make_clean                                                              || exit 113 ;;
-        run)     prereq_compile &&                                              make_run                                     || exit 113 ;;
-        test)    prereq_compile &&                                              make_test                                    || exit 113 ;;
-        debug)   prereq_compile &&                   make_clean &&              make_debug                                   || exit 113 ;;
-        release) prereq_compile &&                   make_clean && make_test && make_release                                 || exit 113 ;;
-        package) prereq_compile && prereq_package && make_clean && make_test && make_release && make_package                 || exit 113 ;;
-        publish) prereq_compile && prereq_package && make_clean && make_test && make_release && make_package && make_publish || exit 113 ;;
+        clean)     TOKENS="$TOKENS clean"                                                                    ;;
+        run)       TOKENS="$TOKENS run"                                ; PREREQ_COMPILE=1                    ;;
+        test)      TOKENS="$TOKENS clean test"                         ; PREREQ_COMPILE=1                    ;;
+        benchmark) TOKENS="$TOKENS clean benchmark"                    ; PREREQ_COMPILE=1                    ;;
+        examples)  TOKENS="$TOKENS clean examples"                     ; PREREQ_COMPILE=1                    ;;
+        debug)     TOKENS="$TOKENS clean debug"                        ; PREREQ_COMPILE=1                    ;;
+        release)   TOKENS="$TOKENS clean test release"                 ; PREREQ_COMPILE=1                    ;;
+        package)   TOKENS="$TOKENS clean test release package"         ; PREREQ_COMPILE=1 ; PREREQ_PACKAGE=1 ;;
+        publish)   TOKENS="$TOKENS clean test release package publish" ; PREREQ_COMPILE=1 ; PREREQ_PACKAGE=1 ;;
+        *)         echo "Unknown action $ACTION" >&2 || exit 113 ;;
+    esac
+done
 
-        *) echo "Unknown action $ACTION" >&2 || exit 113 ;;
+if [ $PREREQ_COMPILE -ne 0 ]; then prereq_compile; fi
+if [ $PREREQ_PACKAGE -ne 0 ]; then prereq_package; fi
+
+TOKENS=$( echo $TOKENS | xargs | tr ' ' '\n' | awk '!seen[$0]++' | xargs )  # remove duplicates
+echo "${ANSI_PURPLE}Make targets ........: ${ANSI_MAGENTA}$TOKENS${ANSI_RESET}"
+echo
+
+for TOKEN in $TOKENS; do
+    case $TOKEN in
+        clean)     make_clean     || exit 113 ;;
+        run)       make_run       || exit 113 ;;
+        test)      make_test      || exit 113 ;;
+        benchmark) make_benchmark || exit 113 ;;
+        examples)  make_examples  || exit 113 ;;
+        debug)     make_debug     || exit 113 ;;
+        release)   make_release   || exit 113 ;;
+        package)   make_package   || exit 113 ;;
+        publish)   make_publish   || exit 113 ;;
+        *)         echo "Unknown token $TOKEN" >&2 || exit 113 ;;
     esac
 done
 
