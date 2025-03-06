@@ -622,13 +622,14 @@ make_publish() {
 }
 
 
-if [ "$1" = "" ]; then ACTIONS="release"; else ACTIONS="$@"; fi
+if [ "$1" = "" ]; then ACTIONS="all"; else ACTIONS="$@"; fi
 
 TOKENS=
 PREREQ_COMPILE=0
 PREREQ_PACKAGE=0
 for ACTION in $ACTIONS; do
     case $ACTION in
+        all)       TOKENS="$TOKENS clean release"                      ; PREREQ_COMPILE=1                    ;;
         clean)     TOKENS="$TOKENS clean"                                                                    ;;
         run)       TOKENS="$TOKENS run"                                ; PREREQ_COMPILE=1                    ;;
         test)      TOKENS="$TOKENS clean test"                         ; PREREQ_COMPILE=1                    ;;
